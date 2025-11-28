@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnSense AI - Intelligent Learning Platform</title>
+    
+    <!-- Pixel Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="floating-shape shape-3"></div>
+        <div class="floating-shape shape-4"></div>
+        <div class="floating-shape shape-5"></div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="header glass">
+        <div class="header-content">
+            <div class="logo-section">
+                <i class="fas fa-brain logo-icon"></i>
+                <h1 class="main-title">LearnSense AI</h1>
+            </div>
+            <p class="tagline">Intelligent Learning Companion</p>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalSessions">0</span>
+                    <span class="stat-label">Sessions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="topicsLearned">0</span>
+                    <span class="stat-label">Topics</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="quizScore">0%</span>
+                    <span class="stat-label">Avg Score</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section class="about-section glass">
+        <h2 class="section-title"><i class="fas fa-info-circle"></i> About LearnSense AI</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <p>LearnSense AI is an advanced intelligent learning platform that leverages cutting-edge artificial intelligence to provide personalized educational experiences. Our platform adapts to your learning style, generates custom content, and tracks your progress in real-time.</p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-robot"></i>
+                        <span>AI-Powered Explanations</span>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Progress Analytics</span>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Adaptive Learning</span>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <span>Smart Recommendations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="container glass">
+        
+        <!-- Learning Interface -->
+        <section class="learning-interface">
+            <h2 class="section-title"><i class="fas fa-book-open"></i> Start Learning</h2>
+            
+            <div class="input-section glass">
+                <div class="input-group">
+                    <i class="fas fa-search input-icon"></i>
+                    <input id="topicInput" placeholder="Enter any topic..." />
+                </div>
+                <div class="level-selector">
+                    <select id="levelSelect" title="Select your knowledge level">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                    <select id="languageSelect" title="Select explanation style">
+                        <option value="english">English</option>
+                        <option value="simple">Simple Terms</option>
+                        <option value="technical">Technical</option>
+                        <option value="metaphor">With Metaphors</option>
+                    </select>
+                </div>
+                <button class="primary-btn" onclick="explainTopic()">
+                    <i class="fas fa-magic"></i> Explain Topic
+                </button>
+            </div>
+
+            <div class="output glass" id="output">
+                <div class="output-placeholder">
+                    <i class="fas fa-lightbulb"></i>
+                    <p>Your AI-generated explanation will appear here...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Tools Section -->
+        <section class="ai-tools-section">
+            <h2 class="section-title"><i class="fas fa-tools"></i> AI Learning Tools</h2>
+            <div class="tools-grid">
+                <div class="tool-card glass" onclick="generateQuiz()">
+                    <i class="fas fa-question-circle"></i>
+                    <h3>Generate Quiz</h3>
+                    <p>Create personalized quizzes on any topic</p>
+                </div>
+                <div class="tool-card glass" onclick="createStudyPlan()">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Study Plan</h3>
+                    <p>Get a structured 7-day learning roadmap</p>
+                </div>
+                <div class="tool-card glass" onclick="generateCodeExample()">
+                    <i class="fas fa-code"></i>
+                    <h3>Code Examples</h3>
+                    <p>Generate practical code demonstrations</p>
+                </div>
+                <div class="tool-card glass" onclick="generateMindMap()">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Mind Map</h3>
+                    <p>Visualize connections between concepts</p>
+                </div>
+                <div class="tool-card glass" onclick="generateFlashcards()">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>Flashcards</h3>
+                    <p>Create interactive study cards</p>
+                </div>
+                <div class="tool-card glass" onclick="generateSummary()">
+                    <i class="fas fa-compress-alt"></i>
+                    <h3>Quick Summary</h3>
+                    <p>Get concise key points overview</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced AI Features -->
+        <section class="advanced-features">
+            <h2 class="section-title"><i class="fas fa-rocket"></i> Advanced AI Features</h2>
+            <div class="features-row">
+                <div class="feature-box glass">
+                    <i class="fas fa-comments"></i>
+                    <h3>AI Tutor Chat</h3>
+                    <p>Interactive Q&A with AI tutor</p>
+                    <button class="secondary-btn" onclick="openAITutor()">Start Chat</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-language"></i>
+                    <h3>Multi-Language</h3>
+                    <p>Translate content to any language</p>
+                    <button class="secondary-btn" onclick="translateContent()">Translate</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-video"></i>
+                    <h3>Video Script</h3>
+                    <p>Generate educational video scripts</p>
+                    <button class="secondary-btn" onclick="generateVideoScript()">Create Script</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-podcast"></i>
+                    <h3>Podcast Outline</h3>
+                    <p>Create podcast episode outlines</p>
+                    <button class="secondary-btn" onclick="generatePodcastOutline()">Create Outline</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Dashboard -->
+        <section class="analytics-section">
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Learning Analytics</h2>
+            <div class="analytics-grid">
+                <div class="chart-container glass">
+                    <h3>Progress Chart</h3>
+                    <canvas id="progressChart"></canvas>
+                </div>
+                <div class="stats-container glass">
+                    <h3>Learning Statistics</h3>
+                    <div class="stat-list">
+                        <div class="stat-row">
+                            <span>Total Study Time</span>
+                            <span id="totalTime">0h 0m</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Completion Rate</span>
+                            <span id="completionRate">0%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Streak Days</span>
+                            <span id="streakDays">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Knowledge Score</span>
+                            <span id="knowledgeScore">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History and Progress -->
+        <section class="history-section">
+            <h2 class="section-title"><i class="fas fa-history"></i> Learning History</h2>
+            <div class="history-controls">
+                <button class="secondary-btn" onclick="showHistory()">
+                    <i class="fas fa-list"></i> Show History
+                </button>
+                <button class="secondary-btn" onclick="exportHistory()">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+                <button class="danger-btn" onclick="clearHistory()">
+                    <i class="fas fa-trash"></i> Clear History
+                </button>
+            </div>
+            <div class="output glass" id="extraOutput">
+                <div class="output-placeholder">
+                    <i class="fas fa-clock"></i>
+                    <p>Your learning history will appear here...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer glass">
+        <div class="footer-content">
+            <p>&copy; 2024 LearnSense AI - Powered by Google Gemini</p>
+            <div class="footer-links">
+                <a href="#" onclick="showAbout()">About</a>
+                <a href="#" onclick="showHelp()">Help</a>
+                <a href="#" onclick="showSettings()">Settings</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-brain fa-spin"></i>
+            <p>AI is thinking...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
