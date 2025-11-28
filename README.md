@@ -7,7 +7,7 @@
 
 **AI-powered learning platform with Google Gemini integration for personalized educational experiences.**
 
-LearnSense AI is an AI-powered learning platform built with HTML, CSS, JavaScript, and Google Gemini Flash 2.0. Developed for Version Control Systems coursework to demonstrate Git operations, branching, merging, and conflict handling.
+LearnSense AI is an AI-powered learning guide built with HTML, CSS, JavaScript, and Google Gemini Flash 2.0. Developed for Version Control Systems coursework to demonstrate Git operations, branching, merging, and conflict handling.
 
 ---
 
@@ -33,14 +33,13 @@ learnsense-ai/
 ## 🎯 Key Features
 
 - **🤖 AI-Powered Explanations**: Get personalized explanations tailored to your knowledge level
-- **📊 Learning Analytics**: Track your progress with detailed analytics and insights
 - **🎯 Adaptive Learning**: Content adapts to your learning pace and style
 - **🧠 Smart Recommendations**: Get personalized topic suggestions based on your interests
 - **💬 Interactive AI Tutor**: Chat with an AI tutor for personalized guidance
 - **🌍 Multi-Language Support**: Learn in your preferred language
 - **📱 Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 
-### 🛠️ AI Tools & Features
+### 🛠️ AI Tools & Features & TECH Stack used
 
 #### Core Learning Tools
 
@@ -59,20 +58,11 @@ learnsense-ai/
 - **Video Script Generator**: Create educational video content
 - **Podcast Outline Creator**: Generate podcast episode structures
 
-#### Analytics & Progress Tracking
-
-- **Learning Statistics**: Track sessions, topics, and performance
-- **Progress Charts**: Visual representation of learning journey
-- **Study Time Tracking**: Monitor time spent on different topics
-- **Completion Rates**: Measure learning effectiveness
-- **Knowledge Scoring**: Quantify your learning progress
-
 #### Technical Stack
 
 - **Frontend**: Vanilla HTML5, CSS3, JavaScript (ES6+)
 - **AI Engine**: Google Gemini 2.0 Flash
 - **Styling**: Custom CSS with CSS Variables and Animations
-- **Charts**: Chart.js for analytics visualization
 - **Icons**: Font Awesome for UI icons
 - **Storage**: LocalStorage for user data persistence
 

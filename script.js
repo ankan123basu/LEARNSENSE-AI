@@ -1,13 +1,21 @@
 // ===== GEMINI AI REST API INTEGRATION =====
 // Using REST API instead of SDK for better compatibility
+// API key loaded from config.js for security
 
-// API key - directly set for static HTML
-const API_KEY = 'AIzaSyCXvwLExkCyVMHLIPf4CdkGyuuhsiRU3CY';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+// API Configuration (loaded from config.js)
+const API_KEY = window.API_CONFIG?.GEMINI_API_KEY || 'AIzaSyDuTMAMHNSzUaCEZS2fbRAeqcSlisy10HQ';
+const API_URL = window.API_CONFIG?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Global API call function
 async function callGeminiAPI(prompt) {
     try {
+        // Debug: Check if API key is loaded
+        if (!API_KEY) {
+            throw new Error('API key is not loaded. Check config.js file.');
+        }
+        
+        console.log('Making API call with key:', API_KEY.substring(0, 10) + '...');
+        
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -24,6 +32,8 @@ async function callGeminiAPI(prompt) {
         });
 
         if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API Error Response:', errorData);
             throw new Error(`API Error: ${response.status} - ${response.statusText}`);
         }
 
@@ -102,6 +112,8 @@ async function explainTopic() {
     const level = document.getElementById("levelSelect").value;
     const language = document.getElementById("languageSelect").value;
     
+    console.log('explainTopic called with:', { topic, level, language });
+    
     if (!topic) {
         showNotification('Please enter a topic to learn about!', 'warning');
         return;
@@ -135,7 +147,11 @@ async function explainTopic() {
         
         Format the response with clear headings and bullet points for easy reading. Keep it comprehensive but accessible.`;
         
+        console.log('Sending prompt:', prompt.substring(0, 100) + '...');
+        
         const result = await callGeminiAPI(prompt);
+        
+        console.log('Received result:', result.substring(0, 100) + '...');
         
         document.getElementById("output").innerHTML = formatAIResponse(result);
         
@@ -146,17 +162,11 @@ async function explainTopic() {
         updateStatsDisplay();
         
         saveHistory(`Explained: ${topic} (${level})`);
-        showNotification('Topic explained successfully!', 'success');
+        showNotification('Explanation generated successfully!', 'success');
         
     } catch (error) {
-        console.error('Error explaining topic:', error);
-        document.getElementById("output").innerHTML = `
-            <div style="color: #ff3366; text-align: center;">
-                <i class="fas fa-exclamation-triangle"></i><br>
-                Error: Unable to generate explanation. Please check your API key and try again.
-            </div>
-        `;
-        showNotification('Failed to generate explanation. Please check your API configuration.', 'error');
+        console.error('Error in explainTopic:', error);
+        showNotification('Error: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -174,7 +184,7 @@ async function generateQuiz() {
     showLoading();
     
     try {
-        const prompt = `Generate 5 comprehensive quiz questions about "${topic}" with the following format:
+        const prompt = `Generate 12 comprehensive quiz questions about "${topic}" with the following format:
         
         For each question provide:
         1. The question (clear and challenging)
@@ -191,6 +201,11 @@ async function generateQuiz() {
         D) [Option D]
         Correct Answer: [Letter]
         Explanation: [Brief explanation]
+        
+        Include a mix of:
+        - 4 easy/beginner questions
+        - 4 intermediate questions  
+        - 4 advanced questions
         
         Make questions progressively more difficult and cover different aspects of the topic.`;
         
@@ -455,14 +470,18 @@ async function translateContent() {
         return;
     }
     
-    const targetLanguage = prompt('Enter target language (e.g., Spanish, French, German, Chinese):');
+    const targetLanguage = prompt('Enter target language (e.g., Hindi, Bengali, Tamil, Telugu, Spanish, French, German, Chinese):');
     
     if (!targetLanguage) return;
     
     showLoading();
     
     try {
-        const prompt = `Translate the following content to ${targetLanguage}. Maintain the structure, formatting, and technical accuracy. Keep any code examples unchanged:\n\n${content}`;
+        const prompt = `Translate the following content to ${targetLanguage}. 
+
+Important: If the target language is Hindi, Bengali, Tamil, or Telugu, please provide accurate translations using proper scripts (Devanagari for Hindi, Bengali script for Bengali, Tamil script for Tamil, Telugu script for Telugu). Maintain the structure, formatting, and technical accuracy. Keep any code examples unchanged:
+
+${content}`;
         
         const result = await callGeminiAPI(prompt);
         
@@ -849,18 +868,30 @@ function loadUserStats() {
 }
 
 function updateStatsDisplay() {
-    document.getElementById("totalSessions").textContent = userStats.totalSessions;
-    document.getElementById("topicsLearned").textContent = userStats.topicsLearned;
+    // Check if stats elements exist (they were replaced with images)
+    const totalSessionsEl = document.getElementById("totalSessions");
+    const topicsLearnedEl = document.getElementById("topicsLearned");
+    const quizScoreEl = document.getElementById("quizScore");
     
-    const avgScore = userStats.quizScores.length > 0 
-        ? Math.round(userStats.quizScores.reduce((a, b) => a + b, 0) / userStats.quizScores.length)
-        : 0;
-    document.getElementById("quizScore").textContent = avgScore + '%';
+    if (totalSessionsEl) totalSessionsEl.textContent = userStats.totalSessions;
+    if (topicsLearnedEl) topicsLearnedEl.textContent = userStats.topicsLearned;
+    if (quizScoreEl) {
+        const avgScore = userStats.quizScores.length > 0 
+            ? Math.round(userStats.quizScores.reduce((a, b) => a + b, 0) / userStats.quizScores.length)
+            : 0;
+        quizScoreEl.textContent = avgScore + '%';
+    }
     
-    document.getElementById("totalTime").textContent = formatTime(userStats.studyTime);
-    document.getElementById("completionRate").textContent = userStats.completionRate + '%';
-    document.getElementById("streakDays").textContent = userStats.streakDays;
-    document.getElementById("knowledgeScore").textContent = userStats.knowledgeScore;
+    // These elements are in the analytics section
+    const totalTimeEl = document.getElementById("totalTime");
+    const completionRateEl = document.getElementById("completionRate");
+    const streakDaysEl = document.getElementById("streakDays");
+    const knowledgeScoreEl = document.getElementById("knowledgeScore");
+    
+    if (totalTimeEl) totalTimeEl.textContent = formatTime(userStats.studyTime);
+    if (completionRateEl) completionRateEl.textContent = userStats.completionRate + '%';
+    if (streakDaysEl) streakDaysEl.textContent = userStats.streakDays;
+    if (knowledgeScoreEl) knowledgeScoreEl.textContent = userStats.knowledgeScore;
     
     // Update chart with new data
     updateChart();
