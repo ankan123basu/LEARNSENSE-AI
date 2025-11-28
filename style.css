@@ -70,6 +70,15 @@ body {
     opacity: 0.1;
     animation: float 20s infinite ease-in-out;
 }
+/* Fixed the bug layout and commented it out
+shape-1 {
+    width: 500px;
+    height: 800px;
+    top: 10%;
+    left: 80%;
+    animation-delay: 10s;
+}
+ */
 
 .shape-1 {
     width: 300px;
