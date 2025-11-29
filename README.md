@@ -328,7 +328,7 @@ git log --graph --decorate --oneline --all
 <img width="1277" height="917" alt="Screenshot 2025-11-30 042148" src="https://github.com/user-attachments/assets/8a5112c1-a057-4212-b1c3-b523e0ad6d04" />
 <img width="1261" height="867" alt="Screenshot 2025-11-30 042155" src="https://github.com/user-attachments/assets/613fe189-ff38-4add-933a-a29701914025" />
 
-#### 4️⃣ Challenges Faced
+
 ## 🧩 Challenges & Solutions
 
 ### 🎯 **Technical Challenges**
@@ -347,8 +347,6 @@ git log --graph --decorate --oneline --all
 - Merge conflict was confusing at first, especially conflict markers
 - Used Git Bash editor by mistake (solved by pressing `q`)
 - Needed multiple attempts to understand `git log` and `git graph` commands
-
-#### 5️⃣ Conclusion
 
 ## 🏁 Conclusion
 
@@ -383,28 +381,31 @@ This assignment gave me **real-world version control experience**, improving my 
 - **Documentation** - Professional technical writing
 - **Code Organization** - Maintainable, scalable architecture
 - **Testing & Debugging** - Systematic problem-solving
-
-
 ---
 
-## Quick Start
+## 🚀 Quick Start Guide
 
-1. **Clone repository**
+### 📋 **Prerequisites**
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Google Gemini API key
+- Basic understanding of web technologies
 
+### ⚡ **Installation Steps**
+
+1. **🔧 Clone the Repository**
 ```bash
 git clone https://github.com/ankan123basu/LEARNSENSE-AI.git
 cd learnsense-ai
 ```
 
-1. **Set up API key**
-
+2. **🔑 Set Up API Key**
 ```bash
-# Option 1: Create .env file (for development)
+# Option 1: Environment File
 cp .env.example .env
 # Edit .env with your Gemini API key
 
-# Option 2: Create config.js file (for static hosting)
-# Create config.js with your API key:
+# Option 2: Config File (for static hosting)
+# Create config.js:
 const API_CONFIG = {
     GEMINI_API_KEY: 'your_gemini_api_key_here',
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
@@ -412,11 +413,21 @@ const API_CONFIG = {
 window.API_CONFIG = API_CONFIG;
 ```
 
-1. **Run application**
-
+3. **🚀 Launch Application**
 ```bash
+# Using Python
 python -m http.server 8000
-# Open <http://localhost:8000>
+
+# Using Node.js
+npx serve .
+
+# Using Live Server (VS Code)
+# Right-click index.html → Open with Live Server
+```
+
+4. **🌐 Access LearnSense AI**
+```
+Open http://localhost:8000 in your browser
 ```
 
 ---
