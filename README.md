@@ -92,6 +92,16 @@ learnsense-ai/
 <img width="1919" height="845" alt="image" src="https://github.com/user-attachments/assets/9c966af6-78f4-403c-8f59-d5e74b9edecb" />
 <img width="1919" height="562" alt="image" src="https://github.com/user-attachments/assets/7a6eccb1-b457-4d71-9367-cbd75539536c" />
 
+### 📋 Creation , Merging of Branches and VIM images
+<img width="1778" height="461" alt="image" src="https://github.com/user-attachments/assets/6a083bc8-82f8-47eb-a7b8-23a882968e53" />
+<img width="1693" height="901" alt="image" src="https://github.com/user-attachments/assets/7c2e5118-3aac-42b7-ab24-ca3e8f917d2e" />
+<img width="733" height="437" alt="image" src="https://github.com/user-attachments/assets/d3386571-ab99-4db5-9c79-ee87f1d5e79e" />
+<img width="1680" height="901" alt="image" src="https://github.com/user-attachments/assets/b5eed13e-418d-430f-ad6a-2b1ffe32821a" />
+<img width="736" height="438" alt="image" src="https://github.com/user-attachments/assets/f6ae32e1-31f8-466d-9fbf-eb006c17aec0" />
+<img width="738" height="447" alt="image" src="https://github.com/user-attachments/assets/e5aea5b9-1553-42e7-af04-cb780da7fa46" />
+<img width="1690" height="889" alt="image" src="https://github.com/user-attachments/assets/1b487ca6-ee3d-4645-9eab-6b2aa1afc57e" />
+<img width="1744" height="895" alt="image" src="https://github.com/user-attachments/assets/6bb135c1-41b3-4046-953b-bc31a6292246" />
+
 ---
 
 ## ✅ Merge Conflict & Resolution
