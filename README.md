@@ -343,8 +343,17 @@ cd learnsense-ai
 1. **Set up API key**
 
 ```bash
+# Option 1: Create .env file (for development)
 cp .env.example .env
 # Edit .env with your Gemini API key
+
+# Option 2: Create config.js file (for static hosting)
+# Create config.js with your API key:
+const API_CONFIG = {
+    GEMINI_API_KEY: 'your_gemini_api_key_here',
+    GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+};
+window.API_CONFIG = API_CONFIG;
 ```
 
 1. **Run application**

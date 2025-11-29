@@ -3,7 +3,7 @@
 // API key loaded from config.js for security
 
 // API Configuration (loaded from config.js)
-const API_KEY = window.API_CONFIG?.GEMINI_API_KEY || 'AIzaSyDuTMAMHNSzUaCEZS2fbRAeqcSlisy10HQ';
+const API_KEY = window.API_CONFIG?.GEMINI_API_KEY;
 const API_URL = window.API_CONFIG?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Global API call function
@@ -11,7 +11,7 @@ async function callGeminiAPI(prompt) {
     try {
         // Debug: Check if API key is loaded
         if (!API_KEY) {
-            throw new Error('API key is not loaded. Check config.js file.');
+            throw new Error('API key not found. Ensure config.js is loaded before script.js');
         }
         
         console.log('Making API call with key:', API_KEY.substring(0, 10) + '...');
@@ -34,7 +34,16 @@ async function callGeminiAPI(prompt) {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('API Error Response:', errorData);
-            throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+            
+            // Extract detailed error message
+            let errorMessage = `API Error: ${response.status}`;
+            if (errorData.error && errorData.error.message) {
+                errorMessage += ` - ${errorData.error.message}`;
+            } else if (errorData.error && errorData.error.status) {
+                errorMessage += ` - ${errorData.error.status}`;
+            }
+            
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();
