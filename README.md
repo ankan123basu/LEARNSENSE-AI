@@ -256,7 +256,7 @@ git log --oneline --graph --all
 git log --graph --decorate --oneline --all
 ```
 
-#### Screenshots in a zist as I already added all above
+#### Screenshots in a zist as I already added all above 
 
 ## 📸 Screenshots
 
@@ -291,6 +291,8 @@ git log --graph --decorate --oneline --all
 <img width="1685" height="541" alt="image" src="https://github.com/user-attachments/assets/24901aaf-9c58-4d9a-a05c-6bd75f04fd13" />
 <img width="1680" height="890" alt="image" src="https://github.com/user-attachments/assets/f972d1e3-704f-42e5-897b-87cd2cf83ee1" />
 <img width="1702" height="900" alt="image" src="https://github.com/user-attachments/assets/b11344a8-e213-455b-b26b-f9d19c7b374e" />
+<img width="1919" height="922" alt="image" src="https://github.com/user-attachments/assets/ce749f31-f21f-482c-a639-1025a0fd5235" />
+<img width="1916" height="909" alt="image" src="https://github.com/user-attachments/assets/cddab3a3-264d-4b43-b28f-2ca8f49ccbd0" />
 
 #### 4️⃣ Challenges Faced
 
