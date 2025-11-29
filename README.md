@@ -283,6 +283,7 @@ git log --graph --decorate --oneline --all
 <img width="1919" height="161" alt="image" src="https://github.com/user-attachments/assets/9e8fa76a-a092-4cef-ada7-9aff477367e7" />
 <img width="813" height="242" alt="image" src="https://github.com/user-attachments/assets/36deb21e-89a4-413d-85b1-66e0f871e915" />
 <img width="571" height="79" alt="image" src="https://github.com/user-attachments/assets/cbf30f73-0961-4ffc-badf-718a98675996" />
+<img width="745" height="446" alt="image" src="https://github.com/user-attachments/assets/77ebb5ae-83cb-47fb-a147-9e1e3c667b5e" />
 
 ### 🌳 3. Git Branch Visualisation
 <img width="1351" height="787" alt="Screenshot 2025-11-29 051436" src="https://github.com/user-attachments/assets/9aec6752-0d31-4796-beb8-093c88dd1003" />
