@@ -1,4 +1,4 @@
-# 🧠 LearnSense AI - Intelligent Learning Platform
+# 🧠 LearnSense AI - Intelligent Learning Platform(A Student's Guide)
 
 ![LearnSense AI Logo](https://img.shields.io/badge/LearnSense-AI-blue?style=for-the-badge&logo=brain)
 ![Version](https://img.shields.io/badge/version-1.0.0-green?style=for-the-badge)
@@ -8,6 +8,11 @@
 **AI-powered learning platform with Google Gemini integration for personalized educational experiences.**
 
 LearnSense AI is an AI-powered learning guide built with HTML, CSS, JavaScript, and Google Gemini Flash 2.0. Developed for Version Control Systems coursework to demonstrate Git operations, branching, merging, and conflict handling.
+<img width="1919" height="779" alt="Screenshot 2025-11-29 050125" src="https://github.com/user-attachments/assets/8b2c29ad-a4de-4c09-8e11-86dd0af6cfc4" />
+
+<img width="1919" height="916" alt="Screenshot 2025-11-29 050229" src="https://github.com/user-attachments/assets/bef4f071-0050-4ee0-8b25-d9b871082241" />
+
+<img width="1919" height="757" alt="Screenshot 2025-11-29 050205" src="https://github.com/user-attachments/assets/aab04c95-88c3-45fe-904a-21b1a0a18753" />
 
 ---
 
@@ -71,6 +76,7 @@ learnsense-ai/
 ## 🌿 Branch Structure
 
 ### 📋 All Branches Created
+<img width="747" height="188" alt="image" src="https://github.com/user-attachments/assets/7b8bc154-bf3d-45aa-adae-a1849b92bb88" />
 
 - **master** - Main production branch
 - **feature-explainer** - Topic explanation functionality
@@ -81,11 +87,14 @@ learnsense-ai/
 - **feature-conflict** - Branch created for merge conflict demonstration
 
 ### 📊 Branch Visualization
-*Screenshot of git branch structure will be shown here*
+<img width="1919" height="843" alt="Screenshot 2025-11-29 041229" src="https://github.com/user-attachments/assets/22d6a3cb-e02e-43a5-afae-470902cb60ff" />
+<img width="1351" height="787" alt="Screenshot 2025-11-29 051436" src="https://github.com/user-attachments/assets/9aec6752-0d31-4796-beb8-093c88dd1003" />
+<img width="1919" height="845" alt="image" src="https://github.com/user-attachments/assets/9c966af6-78f4-403c-8f59-d5e74b9edecb" />
+<img width="1919" height="562" alt="image" src="https://github.com/user-attachments/assets/7a6eccb1-b457-4d71-9367-cbd75539536c" />
 
 ---
 
-## ✅ BLOCK 1 — Merge Conflict & Resolution
+## ✅ Merge Conflict & Resolution
 
 ### ⚠️ Conflict Demonstration
 
@@ -96,6 +105,7 @@ learnsense-ai/
 **Steps performed:**
 
 1. **Created conflict branch**
+<img width="1749" height="648" alt="image" src="https://github.com/user-attachments/assets/a46c781d-2a84-49f8-99d6-baa1866a6bb8" />
 
 ```bash
 git checkout -b feature-conflict
@@ -104,6 +114,7 @@ git commit -m "Changed title in conflict branch to supercharged by GEMINI to cre
 ```
 
 1. **Made conflicting change on master**
+<img width="1919" height="248" alt="image" src="https://github.com/user-attachments/assets/3da6445d-c322-4f55-8aee-125a16d1ba92" />
 
 ```bash
 git checkout master
@@ -112,32 +123,48 @@ git commit -m "Changed title on master branch to Smart Study Partner to create C
 ```
 
 1. **Triggered conflict**
-
+🖥️ VS Code (Conflict Appears Inside Editor)
+<div align="center"> <img src="https://github.com/user-attachments/assets/1c21fffe-2fb8-4a94-a110-109a7832fb13" alt="VS Code Merge Conflict Screenshot" width="900"> </div>
+🧾 Git Bash (Conflict Shown in Terminal)
+<div align="center"> <img src="https://github.com/user-attachments/assets/afee4efe-804b-495a-8f76-40cf3c073ff6" alt="Git Bash Merge Conflict Screenshot" width="500"> </div>
 ```bash
 git merge feature-conflict
 ```
 
 **Resolution:**
-
+<img width="1041" height="123" alt="image" src="https://github.com/user-attachments/assets/222014f4-bb2e-4038-9347-32281c23d705" />
+<img width="1580" height="127" alt="image" src="https://github.com/user-attachments/assets/aeb2ab08-7195-467e-9cce-6a434614dad1" />
 - Manual conflict resolution in `index.html`
-- Final resolved line: `<title>LearnSense AI - Intelligent Learning Platform</title>`
+- Final resolved line: `<title>LearnSense AI - Student AI Guide</title>`
 - Committed with: `git add index.html && git commit -m "RESOLVED MERGE CONFLICT MANUALLY in index.html title"`
 
 ---
 
-## ✅ BLOCK 2 — Documentation
-
-### 📝 Assignment Requirements
-
-#### 1️⃣ Introduction
-
-*See introduction at the top of this README*
+## Documentation
 
 #### 2️⃣ Git Commands Used
 
 ## 🧰 All Git Commands Used in This Project
+<img width="1824" height="902" alt="image" src="https://github.com/user-attachments/assets/af3bc4ee-e137-4cef-b058-0502313f95fd" />
+<img width="1919" height="913" alt="image" src="https://github.com/user-attachments/assets/3af8a6c0-25a8-4d87-94e6-e2121d3668c3" />
+<img width="1683" height="899" alt="image" src="https://github.com/user-attachments/assets/7b328fb6-5f05-4885-ae42-50bc4fa58a97" />
+<img width="1919" height="1013" alt="Screenshot 2025-11-29 041017" src="https://github.com/user-attachments/assets/4788c764-615e-4c98-8ae1-d2bfb1376e8e" />
+<img width="1919" height="850" alt="Screenshot 2025-11-29 041036" src="https://github.com/user-attachments/assets/624be3fc-f009-43d5-92e8-889cf212e75a" />
+<img width="1919" height="1000" alt="Screenshot 2025-11-29 041120" src="https://github.com/user-attachments/assets/6c519df5-53b0-4da3-b774-2e5e3758cc49" />
+<img width="1919" height="926" alt="Screenshot 2025-11-29 041130" src="https://github.com/user-attachments/assets/680710d2-923c-4993-885d-3e9ba57e915a" />
+<img width="1919" height="945" alt="Screenshot 2025-11-29 041138" src="https://github.com/user-attachments/assets/13834d1c-0b6d-46dd-9a76-815eb040493e" />
+<img width="1919" height="645" alt="Screenshot 2025-11-29 041145" src="https://github.com/user-attachments/assets/e990af43-b300-4a2b-9a9e-1fd797978bba" />
+<img width="1919" height="814" alt="Screenshot 2025-11-29 041154" src="https://github.com/user-attachments/assets/85369490-6f3c-4236-ae49-f3a9ab6c1fdf" />
+<img width="1919" height="917" alt="Screenshot 2025-11-29 041202" src="https://github.com/user-attachments/assets/7de930a1-f22d-418e-b4f7-e27de1362c43" />
+<img width="1919" height="1005" alt="Screenshot 2025-11-29 041208" src="https://github.com/user-attachments/assets/2a3cc624-4be3-4cf9-aa3a-39cd071d56c6" />
+<img width="1919" height="1024" alt="Screenshot 2025-11-29 041216" src="https://github.com/user-attachments/assets/9a9367cb-17c4-4099-9a18-3feb2c6b325d" />
+<img width="1919" height="843" alt="Screenshot 2025-11-29 041229" src="https://github.com/user-attachments/assets/8227f7a0-94b9-43ba-b3af-6d5071a7a739" />
+<img width="1919" height="813" alt="Screenshot 2025-11-29 041240" src="https://github.com/user-attachments/assets/9cf59dc0-f690-4fc2-8206-db838fb7af92" />
+<img width="1919" height="488" alt="Screenshot 2025-11-29 041248" src="https://github.com/user-attachments/assets/4b13a130-ac88-424c-b4df-a60546f35ec7" />
+<img width="797" height="224" alt="Screenshot 2025-11-29 041321" src="https://github.com/user-attachments/assets/f412c7d5-91f0-4fa2-8cde-45e2191dce4d" />
 
-### 🔹 Project Setup
+
+### 🔹 Commands in details in written form
 
 ```bash
 mkdir learnsense-ai
@@ -229,29 +256,41 @@ git log --oneline --graph --all
 git log --graph --decorate --oneline --all
 ```
 
-#### 3️⃣ Screenshots Required
+#### Screenshots in a zist as I already added all above
 
 ## 📸 Screenshots
 
 ### 🖥️ 1. Project Folder Screenshot
 
-(Add screenshot)
+<img width="478" height="269" alt="image" src="https://github.com/user-attachments/assets/86871d86-f656-4967-8087-8b33d5e879e2" />
 
 ### 🌿 2. Branch List (git branch)
 
-(Add screenshot)
+<img width="747" height="188" alt="image" src="https://github.com/user-attachments/assets/7b8bc154-bf3d-45aa-adae-a1849b92bb88" />
 
-### 🌳 3. Git Graph (git log --oneline --graph --all)
+### 🌿 2. Git pull , push , remote add origin and other imp commands
+<img width="1919" height="496" alt="image" src="https://github.com/user-attachments/assets/26536a60-0e95-483e-b4fb-82ca15a27451" />
+<img width="1919" height="161" alt="image" src="https://github.com/user-attachments/assets/9e8fa76a-a092-4cef-ada7-9aff477367e7" />
+<img width="813" height="242" alt="image" src="https://github.com/user-attachments/assets/36deb21e-89a4-413d-85b1-66e0f871e915" />
+<img width="571" height="79" alt="image" src="https://github.com/user-attachments/assets/cbf30f73-0961-4ffc-badf-718a98675996" />
 
-(Add screenshot)
+### 🌳 3. Git Branch Visualisation
+<img width="1351" height="787" alt="Screenshot 2025-11-29 051436" src="https://github.com/user-attachments/assets/9aec6752-0d31-4796-beb8-093c88dd1003" />
+<img width="1919" height="845" alt="image" src="https://github.com/user-attachments/assets/9c966af6-78f4-403c-8f59-d5e74b9edecb" />
+<img width="1919" height="562" alt="image" src="https://github.com/user-attachments/assets/7a6eccb1-b457-4d71-9367-cbd75539536c" />
 
 ### 📄 4. Merge Conflict Screenshot
 
-(Add screenshot)
+<img width="1749" height="648" alt="image" src="https://github.com/user-attachments/assets/a46c781d-2a84-49f8-99d6-baa1866a6bb8" />
+🖥️ VS Code (Conflict Appears Inside Editor)
+<div align="center"> <img src="https://github.com/user-attachments/assets/1c21fffe-2fb8-4a94-a110-109a7832fb13" alt="VS Code Merge Conflict Screenshot" width="900"> </div>
+🧾 Git Bash (Conflict Shown in Terminal)
+<div align="center"> <img src="https://github.com/user-attachments/assets/afee4efe-804b-495a-8f76-40cf3c073ff6" alt="Git Bash Merge Conflict Screenshot" width="500"> </div>
 
-### 💾 5. Final Merged Repository on GitHub
-
-(Add screenshot)
+### 💾 5. Commits History
+<img width="1685" height="541" alt="image" src="https://github.com/user-attachments/assets/24901aaf-9c58-4d9a-a05c-6bd75f04fd13" />
+<img width="1680" height="890" alt="image" src="https://github.com/user-attachments/assets/f972d1e3-704f-42e5-897b-87cd2cf83ee1" />
+<img width="1702" height="900" alt="image" src="https://github.com/user-attachments/assets/b11344a8-e213-455b-b26b-f9d19c7b374e" />
 
 #### 4️⃣ Challenges Faced
 
