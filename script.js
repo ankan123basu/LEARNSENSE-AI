@@ -369,21 +369,34 @@ async function generateFlashcards() {
     showLoading();
     
     try {
-        const prompt = `Generate 10 interactive flashcards for studying "${topic}". Format each flashcard as:
-        
-        🎴 Flashcard [Number]
-        ❓ Question: [Clear, specific question]
-        💭 Hint: [Optional hint]
-        ✅ Answer: [Detailed answer]
-        📚 Related Concept: [Connected topic]
-        
-        Make questions progressively challenging and cover different aspects of the topic. Include definitions, problem-solving, and application questions.`;
+        const prompt = `Generate 10 flashcards for studying "${topic}". Return ONLY valid JSON in this exact format:
+
+{
+    "flashcards": [
+        {
+            "number": 1,
+            "question": "What is Java?",
+            "hint": "Think about programming languages",
+            "answer": "Java is a high-level, object-oriented programming language",
+            "related": "Programming languages"
+        },
+        {
+            "number": 2,
+            "question": "What is a variable in Java?",
+            "hint": "Storage for data",
+            "answer": "A variable is a container that holds data values in Java",
+            "related": "Data types"
+        }
+    ]
+}
+
+Generate 10 cards about "${topic}" with progressively challenging questions. Include definitions, concepts, and applications. RETURN ONLY THE JSON - NO OTHER TEXT.`;
         
         const result = await callGeminiAPI(prompt);
         
-        document.getElementById("extraOutput").innerHTML = formatFlashcardsResponse(result);
+        document.getElementById("extraOutput").innerHTML = createVisualFlashcards(result, topic);
         saveHistory(`Flashcards Generated: ${topic}`);
-        showNotification('Flashcards generated successfully!', 'success');
+        showNotification('Visual flashcards generated successfully!', 'success');
         
     } catch (error) {
         console.error('Error generating flashcards:', error);
@@ -391,6 +404,996 @@ async function generateFlashcards() {
     } finally {
         hideLoading();
     }
+}
+
+// ===== VISUAL FLASHCARDS =====
+function createVisualFlashcards(result, topic) {
+    try {
+        console.log('Raw flashcard result:', result);
+        
+        let flashcards;
+        
+        // Try to parse as JSON
+        try {
+            // Clean the result first - remove any extra text
+            const jsonMatch = result.match(/\{[\s\S]*\}/);
+            const jsonString = jsonMatch ? jsonMatch[0] : result;
+            flashcards = JSON.parse(jsonString);
+            console.log('Parsed flashcards:', flashcards);
+        } catch (e) {
+            console.log('JSON parsing failed, trying text extraction:', e);
+            // If JSON parsing fails, extract from text
+            flashcards = extractFlashcardsFromText(result);
+            console.log('Extracted flashcards from text:', flashcards);
+        }
+        
+        if (!flashcards || !flashcards.flashcards || flashcards.flashcards.length === 0) {
+            console.error('No flashcards found, creating fallback');
+            // Create fallback flashcards
+            flashcards = createFallbackFlashcards(topic);
+        }
+        
+        let html = `
+            <div class="flashcards-header">
+                <h3>🎴 Visual Flashcards: ${topic}</h3>
+                <p>Interactive study cards for learning</p>
+            </div>
+            <div class="flashcards-container">
+        `;
+        
+        flashcards.flashcards.forEach((card, index) => {
+            html += `
+                <div class="flashcard" onclick="flipCard(${index})" id="flashcard-${index}">
+                    <div class="flashcard-front">
+                        <div class="flashcard-number">${card.number || index + 1}</div>
+                        <div class="flashcard-question">${card.question || 'Question here'}</div>
+                        ${card.hint ? `<div class="flashcard-hint">💭 Hint: ${card.hint}</div>` : ''}
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-number">${card.number || index + 1}</div>
+                        <div class="flashcard-answer">${card.answer || 'Answer here'}</div>
+                        ${card.related ? `<div class="flashcard-hint">📚 Related: ${card.related}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        return html;
+        
+    } catch (error) {
+        console.error('Error creating visual flashcards:', error);
+        return `<div class="error">Error creating flashcards: ${error.message}</div>`;
+    }
+}
+
+function createFallbackFlashcards(topic) {
+    return {
+        flashcards: [
+            {
+                number: 1,
+                question: `What is ${topic}?`,
+                hint: "Think about the basic definition",
+                answer: `${topic} is a fundamental concept that students need to understand`,
+                related: "Basic concepts"
+            },
+            {
+                number: 2,
+                question: `Why is ${topic} important?`,
+                hint: "Think about real-world applications",
+                answer: `${topic} is important because it has practical applications in various fields`,
+                related: "Applications"
+            },
+            {
+                number: 3,
+                question: `How does ${topic} work?`,
+                hint: "Think about the mechanism",
+                answer: `${topic} works through specific principles and processes`,
+                related: "Mechanisms"
+            }
+        ]
+    };
+}
+
+function extractFlashcardsFromText(text) {
+    const flashcards = { flashcards: [] };
+    const lines = text.split('\n');
+    let currentCard = {};
+    let cardNumber = 0;
+    
+    console.log('Extracting from text lines:', lines);
+    
+    lines.forEach(line => {
+        line = line.trim();
+        
+        // Multiple patterns for different formats
+        if (line.includes('🎴 Flashcard') || line.includes('Flashcard') || line.includes('Card')) {
+            if (Object.keys(currentCard).length > 0) {
+                flashcards.flashcards.push({...currentCard, number: cardNumber});
+                currentCard = {};
+            }
+            cardNumber++;
+        } else if (line.includes('❓ Question:') || line.includes('Question:') || line.includes('Q:')) {
+            currentCard.question = line.replace(/❓ Question:|Question:|Q:/gi, '').trim();
+        } else if (line.includes('💭 Hint:') || line.includes('Hint:')) {
+            currentCard.hint = line.replace(/💭 Hint:|Hint:/gi, '').trim();
+        } else if (line.includes('✅ Answer:') || line.includes('Answer:') || line.includes('A:')) {
+            currentCard.answer = line.replace(/✅ Answer:|Answer:|A:/gi, '').trim();
+        } else if (line.includes('📚 Related:') || line.includes('Related:')) {
+            currentCard.related = line.replace(/📚 Related:|Related:/gi, '').trim();
+        }
+    });
+    
+    if (Object.keys(currentCard).length > 0) {
+        flashcards.flashcards.push({...currentCard, number: cardNumber});
+    }
+    
+    console.log('Extracted flashcards:', flashcards);
+    return flashcards;
+}
+
+function flipCard(index) {
+    const card = document.getElementById(`flashcard-${index}`);
+    if (card) {
+        card.classList.toggle('flipped');
+        console.log(`Flipped card ${index}`);
+    } else {
+        console.error(`Card ${index} not found`);
+    }
+}
+
+// ===== NEW AI FEATURES =====
+// ===== ENHANCED VOICE SUPPORT =====
+async function speakTextWithExternalTTS(text, language) {
+    // Try Google Translate TTS for Indian languages with different endpoint
+    const langCodes = {
+        'hindi': 'hi',
+        'telugu': 'te', 
+        'tamil': 'ta',
+        'bengali': 'bn',
+        'english': 'en',
+        'spanish': 'es',
+        'french': 'fr',
+        'german': 'de',
+        'chinese': 'zh'
+    };
+    
+    const langCode = langCodes[language.toLowerCase()];
+    
+    if (langCode && langCode === 'hi') {
+        // Try multiple Google TTS endpoints for Hindi only
+        const endpoints = [
+            `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(text)}`,
+            `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=gtx&q=${encodeURIComponent(text)}`,
+            `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&q=${encodeURIComponent(text)}`
+        ];
+        
+        for (const endpoint of endpoints) {
+            try {
+                console.log(`Trying TTS endpoint: ${endpoint}`);
+                const audio = new Audio();
+                audio.src = endpoint;
+                await audio.play();
+                console.log(`TTS successful with ${langCode}`);
+                return true;
+            } catch (error) {
+                console.log(`TTS endpoint failed:`, error);
+                continue;
+            }
+        }
+        
+        console.log('All TTS endpoints failed, trying Web Speech API');
+        return false;
+    }
+    
+    return false;
+}
+
+async function generateVoiceExplanation() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    // Ask for language preference
+    const targetLanguage = prompt('Enter voice language (e.g., English, Hindi, Spanish, French, German, Chinese):');
+    
+    if (!targetLanguage) return;
+    
+    showLoading();
+    
+    try {
+        // Generate explanation first
+        const prompt = `Explain "${topic}" in simple terms for voice output in ${targetLanguage}. Keep it concise (2-3 paragraphs) and easy to read aloud. Use clear, simple language suitable for text-to-speech.`;
+        const explanation = await callGeminiAPI(prompt);
+        
+        let useExternalTTS = false;
+        
+        // Check if we need external TTS for Hindi only
+        if (targetLanguage.toLowerCase() === 'hindi') {
+            useExternalTTS = await speakTextWithExternalTTS(explanation, targetLanguage);
+        }
+        
+        // Use Web Speech API if external TTS failed or not needed
+        if (!useExternalTTS && 'speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(explanation);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            
+            // Load voices and try to find matching voice
+            let voices = speechSynthesis.getVoices();
+            
+            // If voices aren't loaded, wait for them
+            if (voices.length === 0) {
+                await new Promise(resolve => {
+                    speechSynthesis.onvoiceschanged = resolve;
+                    setTimeout(resolve, 1000); // Fallback timeout
+                });
+                voices = speechSynthesis.getVoices();
+            }
+            
+            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+            
+            // Try to set voice for the language
+            const voice = voices.find(v => 
+                v.lang.toLowerCase().includes(targetLanguage.toLowerCase()) ||
+                v.name.toLowerCase().includes(targetLanguage.toLowerCase())
+            );
+            
+            if (voice) {
+                utterance.voice = voice;
+                console.log(`Using voice: ${voice.name} (${voice.lang})`);
+                speechSynthesis.speak(utterance);
+            } else {
+                // Try common language codes
+                const langCodes = {
+                    'hindi': 'hi-IN',
+                    'telugu': 'te-IN',
+                    'tamil': 'ta-IN',
+                    'bengali': 'bn-IN',
+                    'spanish': 'es-ES',
+                    'french': 'fr-FR',
+                    'german': 'de-DE',
+                    'chinese': 'zh-CN'
+                };
+                
+                const langCode = langCodes[targetLanguage.toLowerCase()];
+                if (langCode) {
+                    utterance.lang = langCode;
+                    console.log(`Trying language code: ${langCode}`);
+                    speechSynthesis.speak(utterance);
+                } else {
+                    // Show available languages and use English
+                    showNotification(`Voice not available for ${targetLanguage}. Using English. Check console for available languages.`, 'warning');
+                    speechSynthesis.speak(utterance);
+                }
+            }
+        }
+        
+        const ttsMethod = useExternalTTS ? 'External TTS' : 'Web Speech API';
+        
+        document.getElementById("output").innerHTML = `
+            <div class="voice-output">
+                <h3>🎤 AI Voice Tutor: ${topic} (${targetLanguage})</h3>
+                <p class="voice-text">${explanation}</p>
+                <div class="voice-info">
+                    <small>🔊 Using: ${ttsMethod}</small>
+                </div>
+                <div class="voice-controls">
+                    <button onclick="speakAgain()" class="primary-btn">
+                        <i class="fas fa-redo"></i> Speak Again
+                    </button>
+                    <button onclick="stopSpeaking()" class="secondary-btn">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                    <button onclick="changeVoiceLanguage()" class="secondary-btn">
+                        <i class="fas fa-globe"></i> Change Language
+                    </button>
+                    <button onclick="showAvailableVoices()" class="secondary-btn">
+                        <i class="fas fa-list"></i> Available Voices
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        saveHistory(`Voice Explanation: ${topic} (${targetLanguage})`);
+        showNotification(`Voice explanation playing in ${targetLanguage}!`, 'success');
+        
+    } catch (error) {
+        console.error('Error generating voice explanation:', error);
+        showNotification('Failed to generate voice explanation. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function showAvailableVoices() {
+    const voices = speechSynthesis.getVoices();
+    const voiceList = voices.map(v => `${v.name} (${v.lang})`).join('\n');
+    console.log('Available voices:\n' + voiceList);
+    alert(`Available voices:\n${voiceList}`);
+}
+
+function changeVoiceLanguage() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    if (topic) {
+        generateVoiceExplanation();
+    }
+}
+
+async function generateConceptMap() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Create a visual concept map for "${topic}". Format as hierarchical text with indentation and connections:
+        
+        🧠 ${topic}
+        ├── Main Concept 1
+        │   ├── Sub-concept 1.1
+        │   │   └── Detail 1.1.1
+        │   └── Sub-concept 1.2
+        ├── Main Concept 2
+        │   ├── Sub-concept 2.1
+        │   └── Sub-concept 2.2
+        └── Main Concept 3
+            └── Sub-concept 3.1
+        
+        Use emojis and clear hierarchy. Show relationships between concepts.`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = `
+            <div class="concept-map">
+                <h3>🗺️ Concept Map: ${topic}</h3>
+                <pre class="map-content">${result}</pre>
+            </div>
+        `;
+        
+        saveHistory(`Concept Map: ${topic}`);
+        showNotification('Concept map generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating concept map:', error);
+        showNotification('Failed to generate concept map. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generatePracticeProblems() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Generate 8 practice problems for "${topic}". Include a mix of:
+        - Multiple choice questions
+        - Short answer questions  
+        - Problem-solving exercises
+        - Real-world applications
+        
+        Format each problem with:
+        📝 Problem [Number]: [Question]
+        🎯 Type: [Multiple Choice/Short Answer/Problem Solving]
+        💡 Difficulty: [Easy/Medium/Hard]
+        ✅ Answer: [Detailed solution]
+        📚 Explanation: [Why this answer is correct]`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatPracticeProblems(result);
+        saveHistory(`Practice Problems: ${topic}`);
+        showNotification('Practice problems generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating practice problems:', error);
+        showNotification('Failed to generate practice problems. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ===== NEW AI LEARNING TOOLS =====
+async function generateKeyTerms() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Extract and explain the 15 most important key terms and vocabulary for "${topic}". Format as:
+
+📚 Key Terms for ${topic}
+
+1. **Term Name**
+   📝 Definition: [Clear definition]
+   💡 Example: [Practical example]
+   🔗 Related: [Connected concepts]
+
+2. **Next Term**
+   📝 Definition: [Clear definition]
+   💡 Example: [Practical example]
+   🔗 Related: [Connected concepts]
+
+Include essential terminology, concepts, and jargon students must know.`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatKeyTerms(result);
+        saveHistory(`Key Terms: ${topic}`);
+        showNotification('Key terms generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating key terms:', error);
+        showNotification('Failed to generate key terms. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateFAQ() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Generate 12 frequently asked questions and detailed answers about "${topic}". Format as:
+
+❓ FAQ: ${topic}
+
+**Q1: [Common question beginners ask]**
+A: [Comprehensive, detailed answer with examples]
+
+**Q2: [Another important question]**
+A: [Thorough explanation]
+
+Include questions about:
+- Basic concepts and definitions
+- Common misconceptions
+- Practical applications
+- Learning resources
+- Career relevance
+- Advanced topics`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatFAQ(result);
+        saveHistory(`FAQ: ${topic}`);
+        showNotification('FAQ generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating FAQ:', error);
+        showNotification('Failed to generate FAQ. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateExamples() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Generate 10 real-world examples and practical applications of "${topic}". For each example include:
+
+🌍 Real Examples: ${topic}
+
+**Example 1: [Specific application]**
+- 🏢 Industry/Context: [Where this is used]
+- 🔧 How it works: [Practical implementation]
+- 💡 Impact: [Why it matters]
+- 📚 Learning value: [What students can learn]
+
+**Example 2: [Another application]**
+- 🏢 Industry/Context: [Where this is used]
+- 🔧 How it works: [Practical implementation]
+- 💡 Impact: [Why it matters]
+- 📚 Learning value: [What students can learn]
+
+Include diverse examples from different industries and contexts.`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatExamples(result);
+        saveHistory(`Real Examples: ${topic}`);
+        showNotification('Real examples generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating examples:', error);
+        showNotification('Failed to generate examples. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateCheatSheet() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Create a comprehensive cheat sheet for "${topic}". Format as:
+
+📋 Cheat Sheet: ${topic}
+
+**🎯 Quick Overview:**
+- One-line definition
+- Key purpose/use case
+- Main benefit
+
+**⚡ Key Concepts:**
+- 5-7 essential concepts
+- Brief explanation for each
+- Common misconceptions
+
+**🔧 Syntax/Structure:**
+- Basic format/syntax
+- Common patterns
+- Best practices
+
+**💡 Pro Tips:**
+- 3-5 expert tips
+- Common mistakes to avoid
+- Time-saving shortcuts
+
+**📚 Quick Reference:**
+- Important commands/functions
+- Useful resources
+- Related topics
+
+Keep it concise and easy to scan.`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatCheatSheet(result);
+        saveHistory(`Cheat Sheet: ${topic}`);
+        showNotification('Cheat sheet generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating cheat sheet:', error);
+        showNotification('Failed to generate cheat sheet. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateInterviewCoach() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Create an AI interview coach session for "${topic}". Include:
+
+🎤 Interview Coach: ${topic}
+
+**📋 Common Interview Questions:**
+1. [Beginner question]
+   - Expected answer
+   - Key points to mention
+
+2. [Intermediate question]
+   - Expected answer
+   - Technical depth required
+
+3. [Advanced question]
+   - Expected answer
+   - Expert-level insights
+
+**💼 Scenario-based Questions:**
+- Real-world problem scenarios
+- Step-by-step approach
+- Evaluation criteria
+
+**🎯 Pro Tips:**
+- How to structure answers
+- What interviewers look for
+- Red flags to avoid
+
+**📝 Practice Framework:**
+- STAR method examples
+- Confidence-building techniques
+- Follow-up question preparation`;
+
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatInterviewCoach(result);
+        saveHistory(`Interview Coach: ${topic}`);
+        showNotification('Interview coach session ready!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating interview coach:', error);
+        showNotification('Failed to generate interview coach. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ===== NEW ADVANCED AI FEATURES =====
+async function generateWritingHelp() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Provide comprehensive writing assistance for "${topic}". Include:
+
+✍️ AI Writing Assistant: ${topic}
+
+📝 **Essay Structure:**
+- Introduction hooks and thesis statement examples
+- Body paragraph organization
+- Conclusion strategies
+
+🎯 **Key Arguments:**
+- Main points to cover
+- Supporting evidence ideas
+- Counterarguments to address
+
+📚 **Research Guidance:**
+- Important sources to consider
+- Data and statistics to include
+- Expert opinions to reference
+
+✨ **Writing Tips:**
+- Style recommendations
+- Common mistakes to avoid
+- Vocabulary suggestions
+
+🔍 **Quality Checklist:**
+- Elements to review before submission`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatWritingHelp(result);
+        saveHistory(`Writing Help: ${topic}`);
+        showNotification('Writing assistance generated!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating writing help:', error);
+        showNotification('Failed to generate writing help. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateLearningPath() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Create a comprehensive learning path for mastering "${topic}". Structure as:
+
+🛤️ Learning Path: ${topic}
+
+**Phase 1: Foundation (Weeks 1-2)**
+🎯 Goals: [Learning objectives]
+📚 Topics: [Fundamental concepts]
+🛠️ Activities: [Practical exercises]
+✅ Milestone: [Achievement marker]
+
+**Phase 2: Intermediate (Weeks 3-4)**
+🎯 Goals: [Learning objectives]
+📚 Topics: [Intermediate concepts]
+🛠️ Activities: [Hands-on projects]
+✅ Milestone: [Achievement marker]
+
+**Phase 3: Advanced (Weeks 5-6)**
+🎯 Goals: [Learning objectives]
+📚 Topics: [Advanced concepts]
+🛠️ Activities: [Complex projects]
+✅ Milestone: [Achievement marker]
+
+**Phase 4: Mastery (Weeks 7-8)**
+🎯 Goals: [Learning objectives]
+📚 Topics: [Expert-level concepts]
+🛠️ Activities: [Real-world applications]
+✅ Milestone: [Final achievement]
+
+Include recommended resources, time commitments, and assessment methods.`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatLearningPath(result);
+        saveHistory(`Learning Path: ${topic}`);
+        showNotification('Learning path created!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating learning path:', error);
+        showNotification('Failed to generate learning path. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateDeepAnalysis() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Provide an in-depth analysis of "${topic}" for advanced learners. Include:
+
+🔬 Deep Analysis: ${topic}
+
+**📊 Historical Context:**
+- Origins and evolution
+- Key milestones and developments
+- Influential figures and contributions
+
+**🔬 Technical Deep Dive:**
+- Core principles and mechanisms
+- Underlying theories and frameworks
+- Technical specifications and standards
+
+**🌍 Global Impact:**
+- Economic implications
+- Social and cultural effects
+- Environmental considerations
+
+**🔮 Future Trends:**
+- Emerging developments
+- Predicted advancements
+- Potential challenges and opportunities
+
+**🎓 Academic Perspectives:**
+- Current research areas
+- Academic debates and controversies
+- Leading institutions and researchers
+
+**💼 Industry Applications:**
+- Sector-specific implementations
+- Business models and strategies
+- Market trends and forecasts`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatDeepAnalysis(result);
+        saveHistory(`Deep Analysis: ${topic}`);
+        showNotification('Deep analysis completed!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating deep analysis:', error);
+        showNotification('Failed to generate deep analysis. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateLearningGame() {
+    const topic = document.getElementById("topicInput").value.trim() || currentTopic;
+    
+    if (!topic) {
+        showNotification('Please enter a topic first!', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const prompt = `Create an educational game concept for learning "${topic}". Design as:
+
+🎮 Learning Game: ${topic}
+
+**🎯 Game Concept:**
+- Game name and theme
+- Learning objectives
+- Target audience
+- Game type (quiz, simulation, puzzle, etc.)
+
+**📖 Game Story:**
+- Narrative and setting
+- Characters and roles
+- Plot progression
+- Learning integration
+
+**🎮 Gameplay Mechanics:**
+- Core game loop
+- Scoring system
+- Difficulty progression
+- Interactive elements
+
+**🏆 Levels & Challenges:**
+- Level descriptions
+- Challenge types
+- Boss battles (final tests)
+- Achievement system
+
+**📚 Learning Integration:**
+- How educational content is embedded
+- Feedback mechanisms
+- Progress tracking
+- Assessment methods
+
+**🛠️ Implementation:**
+- Materials needed
+- Digital or physical format
+- Single/multiplayer options
+- Accessibility features`;
+        
+        const result = await callGeminiAPI(prompt);
+        
+        document.getElementById("extraOutput").innerHTML = formatLearningGame(result);
+        saveHistory(`Learning Game: ${topic}`);
+        showNotification('Learning game created!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating learning game:', error);
+        showNotification('Failed to generate learning game. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ===== FORMATTING FUNCTIONS =====
+function formatKeyTerms(result) {
+    return `
+        <div class="key-terms">
+            <h3>📚 Key Terms & Vocabulary</h3>
+            <div class="terms-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatFAQ(result) {
+    return `
+        <div class="faq-section">
+            <h3>❓ Frequently Asked Questions</h3>
+            <div class="faq-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatExamples(result) {
+    return `
+        <div class="examples-section">
+            <h3>🌍 Real-World Examples</h3>
+            <div class="examples-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatCheatSheet(result) {
+    return `
+        <div class="cheat-sheet">
+            <h3>📋 Quick Reference Cheat Sheet</h3>
+            <div class="cheat-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatInterviewCoach(result) {
+    return `
+        <div class="interview-coach">
+            <h3>🎤 AI Interview Coach Session</h3>
+            <div class="coach-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatWritingHelp(result) {
+    return `
+        <div class="writing-help">
+            <h3>✍️ AI Writing Assistant</h3>
+            <div class="writing-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatLearningPath(result) {
+    return `
+        <div class="learning-path">
+            <h3>🛤️ Personalized Learning Path</h3>
+            <div class="path-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatDeepAnalysis(result) {
+    return `
+        <div class="deep-analysis">
+            <h3>🔬 In-Depth Analysis</h3>
+            <div class="analysis-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+function formatLearningGame(result) {
+    return `
+        <div class="learning-game">
+            <h3>🎮 Educational Learning Game</h3>
+            <div class="game-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
+}
+
+// Helper functions for voice features
+async function speakAgain() {
+    const text = document.querySelector('.voice-text')?.textContent;
+    const languageMatch = document.querySelector('.voice-output h3')?.textContent.match(/\(([^)]+)\)/);
+    const language = languageMatch ? languageMatch[1] : 'english';
+    
+    if (text) {
+        // Try external TTS first for Hindi only
+        if (language.toLowerCase() === 'hindi') {
+            const success = await speakTextWithExternalTTS(text, language);
+            if (success) return;
+        }
+        
+        // Fallback to Web Speech API
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function stopSpeaking() {
+    speechSynthesis.cancel();
+}
+
+function formatPracticeProblems(result) {
+    return `
+        <div class="practice-problems">
+            <h3>📚 Practice Problems</h3>
+            <div class="problems-content">${result.replace(/\n/g, '<br>')}</div>
+        </div>
+    `;
 }
 
 // ===== QUICK SUMMARY GENERATOR =====

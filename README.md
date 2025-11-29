@@ -44,7 +44,7 @@ learnsense-ai/
 - **🌍 Multi-Language Support**: Learn in your preferred language
 - **📱 Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 
-### 🛠️ AI Tools & Features & TECH Stack used
+### �️ AI Tools & Features & TECH Stack used
 
 #### Core Learning Tools
 

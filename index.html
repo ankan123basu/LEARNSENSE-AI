@@ -10,9 +10,6 @@
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Chart.js for Analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -54,7 +51,7 @@
         <h2 class="section-title"><i class="fas fa-info-circle"></i> About LearnSense AI</h2>
         <div class="about-content">
             <div class="about-text">
-                <p>LearnSense AI is an advanced intelligent learning platform that leverages cutting-edge artificial intelligence to provide personalized educational experiences. Our platform adapts to your learning style, generates custom content, and tracks your progress in real-time.</p>
+                <p>LearnSense AI is an advanced intelligent learning platform that leverages cutting-edge artificial intelligence to provide personalized educational experiences. Our platform adapts to your learning style and generates custom content tailored to your needs.</p>
                 <div class="features-grid">
                     <div class="feature-card">
                         <i class="fas fa-robot"></i>
@@ -71,6 +68,14 @@
                     <div class="feature-card">
                         <i class="fas fa-brain"></i>
                         <span>Smart Recommendations</span>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-microphone"></i>
+                        <span>Voice Learning</span>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-users"></i>
+                        <span>Collaborative Learning</span>
                     </div>
                 </div>
             </div>
@@ -150,6 +155,26 @@
                     <h3>Quick Summary</h3>
                     <p>Get concise key points overview</p>
                 </div>
+                <div class="tool-card glass" onclick="generateKeyTerms()">
+                    <i class="fas fa-book"></i>
+                    <h3>Key Terms</h3>
+                    <p>Extract important vocabulary</p>
+                </div>
+                <div class="tool-card glass" onclick="generateFAQ()">
+                    <i class="fas fa-question-circle"></i>
+                    <h3>FAQ Generator</h3>
+                    <p>Create common questions & answers</p>
+                </div>
+                <div class="tool-card glass" onclick="generateExamples()">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Real Examples</h3>
+                    <p>Practical real-world applications</p>
+                </div>
+                <div class="tool-card glass" onclick="generateCheatSheet()">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Cheat Sheet</h3>
+                    <p>Quick reference guide</p>
+                </div>
             </div>
         </section>
 
@@ -181,18 +206,66 @@
                     <p>Create podcast episode outlines</p>
                     <button class="secondary-btn" onclick="generatePodcastOutline()">Create Outline</button>
                 </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-microphone"></i>
+                    <h3>AI Voice Tutor</h3>
+                    <p>Convert text to spoken explanations</p>
+                    <button class="secondary-btn" onclick="generateVoiceExplanation()">Listen</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Concept Map</h3>
+                    <p>Generate visual knowledge maps</p>
+                    <button class="secondary-btn" onclick="generateConceptMap()">Create Map</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-calculator"></i>
+                    <h3>Practice Problems</h3>
+                    <p>Generate math/science problems</p>
+                    <button class="secondary-btn" onclick="generatePracticeProblems()">Generate</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Writing Assistant</h3>
+                    <p>Help with essays and assignments</p>
+                    <button class="secondary-btn" onclick="generateWritingHelp()">Get Help</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Learning Path</h3>
+                    <p>Create personalized learning roadmap</p>
+                    <button class="secondary-btn" onclick="generateLearningPath()">Create Path</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-microscope"></i>
+                    <h3>Deep Analysis</h3>
+                    <p>In-depth topic exploration</p>
+                    <button class="secondary-btn" onclick="generateDeepAnalysis()">Analyze</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-gamepad"></i>
+                    <h3>Game Idea Generator</h3>
+                    <p>Create educational game concepts</p>
+                    <button class="secondary-btn" onclick="generateLearningGame()">Generate Idea</button>
+                </div>
+                <div class="feature-box glass">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Interview Coach</h3>
+                    <p>Practice interview questions</p>
+                    <button class="secondary-btn" onclick="generateInterviewCoach()">Start Practice</button>
+                </div>
             </div>
         </section>
 
         <!-- AI Education Dashboard -->
-        <section class="analytics-section">
+        <section class="ai-education-section">
             <h2 class="section-title"><i class="fas fa-robot"></i> AI in Education</h2>
-            <div class="analytics-grid">
+            <div class="ai-education-grid">
                 <div class="chart-container glass">
                     <h3>Smart Learning Path</h3>
-                    <img src="images/the_role_of_ai_in_education_a_learning_tool_rather_than_a_crutch_featured.jpg" alt="AI Education" class="progress-chart-img">
+                    <img src="images/the_role_of_ai_in_education_a_learning_tool_rather_than_a_crutch_featured.jpg" alt="AI Education" class="ai-education-img">
                 </div>
-                <div class="stats-container glass ai-bg-section">
+                <div class="features-container glass ai-bg-section">
                     <h3>Smart Learning Features</h3>
                     <div class="stat-list">
                         <div class="stat-row">
@@ -216,7 +289,7 @@
             </div>
         </section>
 
-        <!-- History and Progress -->
+        <!-- Learning History -->
         <section class="history-section">
             <h2 class="section-title"><i class="fas fa-history"></i> Learning History</h2>
             <div class="history-controls">
