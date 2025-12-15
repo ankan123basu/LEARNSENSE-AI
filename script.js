@@ -1,55 +1,45 @@
-// ===== GEMINI AI REST API INTEGRATION =====
-// Using REST API instead of SDK for better compatibility
-// API key loaded from config.js for security
-
-// API Configuration (loaded from config.js)
-const API_KEY = window.API_CONFIG?.GEMINI_API_KEY;
-const API_URL = window.API_CONFIG?.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+// ===== GROQ AI REST API INTEGRATION =====
+// Using REST API for best compatibility
+// API key loaded from config-loader.js
 
 // Global API call function
-async function callGeminiAPI(prompt) {
+async function callGroqAPI(prompt) {
     try {
+        const API_KEY = window.API_CONFIG?.GROQ_API_KEY;
+        const API_URL = window.API_CONFIG?.GROQ_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+
         // Debug: Check if API key is loaded
         if (!API_KEY) {
-            throw new Error('API key not found. Ensure config.js is loaded before script.js');
+            throw new Error('API key not found. Ensure .env is populated and config-loader.js is loaded.');
         }
-        
-        console.log('Making API call with key:', API_KEY.substring(0, 10) + '...');
-        
+
+        console.log('Making API call to Groq...');
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-goog-api-key': API_KEY
+                'Authorization': `Bearer ${API_KEY}`
             },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
+                messages: [{
+                    role: "user",
+                    content: prompt
+                }],
+                model: "llama-3.3-70b-versatile"
             })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
             console.error('API Error Response:', errorData);
-            
-            // Extract detailed error message
-            let errorMessage = `API Error: ${response.status}`;
-            if (errorData.error && errorData.error.message) {
-                errorMessage += ` - ${errorData.error.message}`;
-            } else if (errorData.error && errorData.error.status) {
-                errorMessage += ` - ${errorData.error.status}`;
-            }
-            
-            throw new Error(errorMessage);
+            throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`);
         }
 
         const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
+        return data.choices[0].message.content;
     } catch (error) {
-        console.error('Gemini API Error:', error);
+        console.error('Groq API Error:', error);
         throw error;
     }
 }
@@ -68,7 +58,7 @@ let userStats = {
 };
 
 // ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
     loadUserStats();
     updateStatsDisplay();
@@ -78,14 +68,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApp() {
     // Load learning history from localStorage
     learningHistory = JSON.parse(localStorage.getItem('learnHistory')) || [];
-    
+
     // Add enter key support for topic input
-    document.getElementById('topicInput').addEventListener('keypress', function(e) {
+    document.getElementById('topicInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             explainTopic();
         }
     });
-    
+
     // Initialize tooltips and interactions
     initializeInteractions();
 }
@@ -94,11 +84,11 @@ function initializeInteractions() {
     // Add hover effects and micro-interactions
     const toolCards = document.querySelectorAll('.tool-card, .feature-box');
     toolCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
+        card.addEventListener('mouseenter', function () {
             this.style.transform = 'translateY(-5px) scale(1.02)';
         });
-        
-        card.addEventListener('mouseleave', function() {
+
+        card.addEventListener('mouseleave', function () {
             this.style.transform = 'translateY(0) scale(1)';
         });
     });
@@ -120,17 +110,17 @@ async function explainTopic() {
     const topic = document.getElementById("topicInput").value.trim();
     const level = document.getElementById("levelSelect").value;
     const language = document.getElementById("languageSelect").value;
-    
+
     console.log('explainTopic called with:', { topic, level, language });
-    
+
     if (!topic) {
         showNotification('Please enter a topic to learn about!', 'warning');
         return;
     }
-    
+
     showLoading();
     currentTopic = topic;
-    
+
     try {
         const levelDescriptions = {
             beginner: "simple terms for complete beginners",
@@ -138,14 +128,14 @@ async function explainTopic() {
             advanced: "technical and in-depth coverage",
             expert: "expert-level comprehensive analysis"
         };
-        
+
         const languageStyles = {
             english: "standard English",
             simple: "simple everyday language",
             technical: "technical terminology",
             metaphor: "using metaphors and analogies"
         };
-        
+
         const prompt = `Explain the topic "${topic}" in ${levelDescriptions[level]} using ${languageStyles[language]}. 
         Include:
         - A clear definition
@@ -155,24 +145,24 @@ async function explainTopic() {
         - Related topics to explore next
         
         Format the response with clear headings and bullet points for easy reading. Keep it comprehensive but accessible.`;
-        
+
         console.log('Sending prompt:', prompt.substring(0, 100) + '...');
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         console.log('Received result:', result.substring(0, 100) + '...');
-        
+
         document.getElementById("output").innerHTML = formatAIResponse(result);
-        
+
         // Update stats and history
         userStats.totalSessions++;
         userStats.topicsLearned++;
         saveUserStats();
         updateStatsDisplay();
-        
+
         saveHistory(`Explained: ${topic} (${level})`);
         showNotification('Explanation generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error in explainTopic:', error);
         showNotification('Error: ' + error.message, 'error');
@@ -184,14 +174,14 @@ async function explainTopic() {
 // ===== QUIZ GENERATOR =====
 async function generateQuiz() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Generate 12 comprehensive quiz questions about "${topic}" with the following format:
         
@@ -217,13 +207,13 @@ async function generateQuiz() {
         - 4 advanced questions
         
         Make questions progressively more difficult and cover different aspects of the topic.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatQuizResponse(result);
         saveHistory(`Quiz Generated on: ${topic}`);
         showNotification('Quiz generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating quiz:', error);
         showNotification('Failed to generate quiz. Please try again.', 'error');
@@ -235,14 +225,14 @@ async function generateQuiz() {
 // ===== STUDY PLAN CREATOR =====
 async function createStudyPlan() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a comprehensive 7-day study plan to master "${topic}". For each day include:
         
@@ -254,13 +244,13 @@ async function createStudyPlan() {
         ✅ Check Understanding: [Self-assessment questions]
         
         Make the plan progressive, building from fundamentals to advanced concepts. Include a mix of theory, practice, and review sessions.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatStudyPlanResponse(result);
         saveHistory(`Study Plan Created: ${topic}`);
         showNotification('Study plan created successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error creating study plan:', error);
         showNotification('Failed to create study plan. Please try again.', 'error');
@@ -272,14 +262,14 @@ async function createStudyPlan() {
 // ===== CODE EXAMPLES GENERATOR =====
 async function generateCodeExample() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Generate practical code examples for "${topic}". Include:
         
@@ -295,13 +285,13 @@ async function generateCodeExample() {
         - Key concepts demonstrated
         
         Use appropriate programming languages for the topic (Python, JavaScript, Java, etc.). Format code blocks properly.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatCodeResponse(result);
         saveHistory(`Code Examples Generated: ${topic}`);
         showNotification('Code examples generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating code examples:', error);
         showNotification('Failed to generate code examples. Please try again.', 'error');
@@ -313,14 +303,14 @@ async function generateCodeExample() {
 // ===== MIND MAP GENERATOR =====
 async function generateMindMap() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a comprehensive mind map structure for "${topic}". Organize it as follows:
         
@@ -342,13 +332,13 @@ async function generateMindMap() {
         - Practical applications
         
         Use visual hierarchy with emojis and indentation to show relationships clearly.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatMindMapResponse(result);
         saveHistory(`Mind Map Generated: ${topic}`);
         showNotification('Mind map generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating mind map:', error);
         showNotification('Failed to generate mind map. Please try again.', 'error');
@@ -360,14 +350,14 @@ async function generateMindMap() {
 // ===== FLASHCARDS GENERATOR =====
 async function generateFlashcards() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Generate 10 flashcards for studying "${topic}". Return ONLY valid JSON in this exact format:
 
@@ -391,13 +381,13 @@ async function generateFlashcards() {
 }
 
 Generate 10 cards about "${topic}" with progressively challenging questions. Include definitions, concepts, and applications. RETURN ONLY THE JSON - NO OTHER TEXT.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = createVisualFlashcards(result, topic);
         saveHistory(`Flashcards Generated: ${topic}`);
         showNotification('Visual flashcards generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating flashcards:', error);
         showNotification('Failed to generate flashcards. Please try again.', 'error');
@@ -410,9 +400,9 @@ Generate 10 cards about "${topic}" with progressively challenging questions. Inc
 function createVisualFlashcards(result, topic) {
     try {
         console.log('Raw flashcard result:', result);
-        
+
         let flashcards;
-        
+
         // Try to parse as JSON
         try {
             // Clean the result first - remove any extra text
@@ -426,13 +416,13 @@ function createVisualFlashcards(result, topic) {
             flashcards = extractFlashcardsFromText(result);
             console.log('Extracted flashcards from text:', flashcards);
         }
-        
+
         if (!flashcards || !flashcards.flashcards || flashcards.flashcards.length === 0) {
             console.error('No flashcards found, creating fallback');
             // Create fallback flashcards
             flashcards = createFallbackFlashcards(topic);
         }
-        
+
         let html = `
             <div class="flashcards-header">
                 <h3>🎴 Visual Flashcards: ${topic}</h3>
@@ -440,7 +430,7 @@ function createVisualFlashcards(result, topic) {
             </div>
             <div class="flashcards-container">
         `;
-        
+
         flashcards.flashcards.forEach((card, index) => {
             html += `
                 <div class="flashcard" onclick="flipCard(${index})" id="flashcard-${index}">
@@ -457,10 +447,10 @@ function createVisualFlashcards(result, topic) {
                 </div>
             `;
         });
-        
+
         html += '</div>';
         return html;
-        
+
     } catch (error) {
         console.error('Error creating visual flashcards:', error);
         return `<div class="error">Error creating flashcards: ${error.message}</div>`;
@@ -500,16 +490,16 @@ function extractFlashcardsFromText(text) {
     const lines = text.split('\n');
     let currentCard = {};
     let cardNumber = 0;
-    
+
     console.log('Extracting from text lines:', lines);
-    
+
     lines.forEach(line => {
         line = line.trim();
-        
+
         // Multiple patterns for different formats
         if (line.includes('🎴 Flashcard') || line.includes('Flashcard') || line.includes('Card')) {
             if (Object.keys(currentCard).length > 0) {
-                flashcards.flashcards.push({...currentCard, number: cardNumber});
+                flashcards.flashcards.push({ ...currentCard, number: cardNumber });
                 currentCard = {};
             }
             cardNumber++;
@@ -523,11 +513,11 @@ function extractFlashcardsFromText(text) {
             currentCard.related = line.replace(/📚 Related:|Related:/gi, '').trim();
         }
     });
-    
+
     if (Object.keys(currentCard).length > 0) {
-        flashcards.flashcards.push({...currentCard, number: cardNumber});
+        flashcards.flashcards.push({ ...currentCard, number: cardNumber });
     }
-    
+
     console.log('Extracted flashcards:', flashcards);
     return flashcards;
 }
@@ -548,7 +538,7 @@ async function speakTextWithExternalTTS(text, language) {
     // Try Google Translate TTS for Indian languages with different endpoint
     const langCodes = {
         'hindi': 'hi',
-        'telugu': 'te', 
+        'telugu': 'te',
         'tamil': 'ta',
         'bengali': 'bn',
         'english': 'en',
@@ -557,9 +547,9 @@ async function speakTextWithExternalTTS(text, language) {
         'german': 'de',
         'chinese': 'zh'
     };
-    
+
     const langCode = langCodes[language.toLowerCase()];
-    
+
     if (langCode && langCode === 'hi') {
         // Try multiple Google TTS endpoints for Hindi only
         const endpoints = [
@@ -567,7 +557,7 @@ async function speakTextWithExternalTTS(text, language) {
             `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=gtx&q=${encodeURIComponent(text)}`,
             `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&q=${encodeURIComponent(text)}`
         ];
-        
+
         for (const endpoint of endpoints) {
             try {
                 console.log(`Trying TTS endpoint: ${endpoint}`);
@@ -581,51 +571,51 @@ async function speakTextWithExternalTTS(text, language) {
                 continue;
             }
         }
-        
+
         console.log('All TTS endpoints failed, trying Web Speech API');
         return false;
     }
-    
+
     return false;
 }
 
 async function generateVoiceExplanation() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     // Ask for language preference
     const targetLanguage = prompt('Enter voice language (e.g., English, Hindi, Spanish, French, German, Chinese):');
-    
+
     if (!targetLanguage) return;
-    
+
     showLoading();
-    
+
     try {
         // Generate explanation first
         const prompt = `Explain "${topic}" in simple terms for voice output in ${targetLanguage}. Keep it concise (2-3 paragraphs) and easy to read aloud. Use clear, simple language suitable for text-to-speech.`;
-        const explanation = await callGeminiAPI(prompt);
-        
+        const explanation = await callGroqAPI(prompt);
+
         let useExternalTTS = false;
-        
+
         // Check if we need external TTS for Hindi only
         if (targetLanguage.toLowerCase() === 'hindi') {
             useExternalTTS = await speakTextWithExternalTTS(explanation, targetLanguage);
         }
-        
+
         // Use Web Speech API if external TTS failed or not needed
         if (!useExternalTTS && 'speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(explanation);
             utterance.rate = 0.9;
             utterance.pitch = 1;
             utterance.volume = 1;
-            
+
             // Load voices and try to find matching voice
             let voices = speechSynthesis.getVoices();
-            
+
             // If voices aren't loaded, wait for them
             if (voices.length === 0) {
                 await new Promise(resolve => {
@@ -634,15 +624,15 @@ async function generateVoiceExplanation() {
                 });
                 voices = speechSynthesis.getVoices();
             }
-            
+
             console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
-            
+
             // Try to set voice for the language
-            const voice = voices.find(v => 
+            const voice = voices.find(v =>
                 v.lang.toLowerCase().includes(targetLanguage.toLowerCase()) ||
                 v.name.toLowerCase().includes(targetLanguage.toLowerCase())
             );
-            
+
             if (voice) {
                 utterance.voice = voice;
                 console.log(`Using voice: ${voice.name} (${voice.lang})`);
@@ -659,7 +649,7 @@ async function generateVoiceExplanation() {
                     'german': 'de-DE',
                     'chinese': 'zh-CN'
                 };
-                
+
                 const langCode = langCodes[targetLanguage.toLowerCase()];
                 if (langCode) {
                     utterance.lang = langCode;
@@ -672,9 +662,9 @@ async function generateVoiceExplanation() {
                 }
             }
         }
-        
+
         const ttsMethod = useExternalTTS ? 'External TTS' : 'Web Speech API';
-        
+
         document.getElementById("output").innerHTML = `
             <div class="voice-output">
                 <h3>🎤 AI Voice Tutor: ${topic} (${targetLanguage})</h3>
@@ -698,10 +688,10 @@ async function generateVoiceExplanation() {
                 </div>
             </div>
         `;
-        
+
         saveHistory(`Voice Explanation: ${topic} (${targetLanguage})`);
         showNotification(`Voice explanation playing in ${targetLanguage}!`, 'success');
-        
+
     } catch (error) {
         console.error('Error generating voice explanation:', error);
         showNotification('Failed to generate voice explanation. Please try again.', 'error');
@@ -726,14 +716,14 @@ function changeVoiceLanguage() {
 
 async function generateConceptMap() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a visual concept map for "${topic}". Format as hierarchical text with indentation and connections:
         
@@ -749,19 +739,19 @@ async function generateConceptMap() {
             └── Sub-concept 3.1
         
         Use emojis and clear hierarchy. Show relationships between concepts.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = `
             <div class="concept-map">
                 <h3>🗺️ Concept Map: ${topic}</h3>
                 <pre class="map-content">${result}</pre>
             </div>
         `;
-        
+
         saveHistory(`Concept Map: ${topic}`);
         showNotification('Concept map generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating concept map:', error);
         showNotification('Failed to generate concept map. Please try again.', 'error');
@@ -772,14 +762,14 @@ async function generateConceptMap() {
 
 async function generatePracticeProblems() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Generate 8 practice problems for "${topic}". Include a mix of:
         - Multiple choice questions
@@ -793,13 +783,13 @@ async function generatePracticeProblems() {
         💡 Difficulty: [Easy/Medium/Hard]
         ✅ Answer: [Detailed solution]
         📚 Explanation: [Why this answer is correct]`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatPracticeProblems(result);
         saveHistory(`Practice Problems: ${topic}`);
         showNotification('Practice problems generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating practice problems:', error);
         showNotification('Failed to generate practice problems. Please try again.', 'error');
@@ -811,14 +801,14 @@ async function generatePracticeProblems() {
 // ===== NEW AI LEARNING TOOLS =====
 async function generateKeyTerms() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Extract and explain the 15 most important key terms and vocabulary for "${topic}". Format as:
 
@@ -835,13 +825,13 @@ async function generateKeyTerms() {
    🔗 Related: [Connected concepts]
 
 Include essential terminology, concepts, and jargon students must know.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatKeyTerms(result);
         saveHistory(`Key Terms: ${topic}`);
         showNotification('Key terms generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating key terms:', error);
         showNotification('Failed to generate key terms. Please try again.', 'error');
@@ -852,14 +842,14 @@ Include essential terminology, concepts, and jargon students must know.`;
 
 async function generateFAQ() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Generate 12 frequently asked questions and detailed answers about "${topic}". Format as:
 
@@ -878,13 +868,13 @@ Include questions about:
 - Learning resources
 - Career relevance
 - Advanced topics`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatFAQ(result);
         saveHistory(`FAQ: ${topic}`);
         showNotification('FAQ generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating FAQ:', error);
         showNotification('Failed to generate FAQ. Please try again.', 'error');
@@ -895,14 +885,14 @@ Include questions about:
 
 async function generateExamples() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Generate 10 real-world examples and practical applications of "${topic}". For each example include:
 
@@ -921,13 +911,13 @@ async function generateExamples() {
 - 📚 Learning value: [What students can learn]
 
 Include diverse examples from different industries and contexts.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatExamples(result);
         saveHistory(`Real Examples: ${topic}`);
         showNotification('Real examples generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating examples:', error);
         showNotification('Failed to generate examples. Please try again.', 'error');
@@ -938,14 +928,14 @@ Include diverse examples from different industries and contexts.`;
 
 async function generateCheatSheet() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a comprehensive cheat sheet for "${topic}". Format as:
 
@@ -977,13 +967,13 @@ async function generateCheatSheet() {
 - Related topics
 
 Keep it concise and easy to scan.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatCheatSheet(result);
         saveHistory(`Cheat Sheet: ${topic}`);
         showNotification('Cheat sheet generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating cheat sheet:', error);
         showNotification('Failed to generate cheat sheet. Please try again.', 'error');
@@ -994,14 +984,14 @@ Keep it concise and easy to scan.`;
 
 async function generateInterviewCoach() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create an AI interview coach session for "${topic}". Include:
 
@@ -1035,12 +1025,12 @@ async function generateInterviewCoach() {
 - Confidence-building techniques
 - Follow-up question preparation`;
 
-        const result = await callGeminiAPI(prompt);
-        
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatInterviewCoach(result);
         saveHistory(`Interview Coach: ${topic}`);
         showNotification('Interview coach session ready!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating interview coach:', error);
         showNotification('Failed to generate interview coach. Please try again.', 'error');
@@ -1052,14 +1042,14 @@ async function generateInterviewCoach() {
 // ===== NEW ADVANCED AI FEATURES =====
 async function generateWritingHelp() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Provide comprehensive writing assistance for "${topic}". Include:
 
@@ -1087,13 +1077,13 @@ async function generateWritingHelp() {
 
 🔍 **Quality Checklist:**
 - Elements to review before submission`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatWritingHelp(result);
         saveHistory(`Writing Help: ${topic}`);
         showNotification('Writing assistance generated!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating writing help:', error);
         showNotification('Failed to generate writing help. Please try again.', 'error');
@@ -1104,14 +1094,14 @@ async function generateWritingHelp() {
 
 async function generateLearningPath() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a comprehensive learning path for mastering "${topic}". Structure as:
 
@@ -1142,13 +1132,13 @@ async function generateLearningPath() {
 ✅ Milestone: [Final achievement]
 
 Include recommended resources, time commitments, and assessment methods.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatLearningPath(result);
         saveHistory(`Learning Path: ${topic}`);
         showNotification('Learning path created!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating learning path:', error);
         showNotification('Failed to generate learning path. Please try again.', 'error');
@@ -1159,14 +1149,14 @@ Include recommended resources, time commitments, and assessment methods.`;
 
 async function generateDeepAnalysis() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Provide an in-depth analysis of "${topic}" for advanced learners. Include:
 
@@ -1201,13 +1191,13 @@ async function generateDeepAnalysis() {
 - Sector-specific implementations
 - Business models and strategies
 - Market trends and forecasts`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatDeepAnalysis(result);
         saveHistory(`Deep Analysis: ${topic}`);
         showNotification('Deep analysis completed!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating deep analysis:', error);
         showNotification('Failed to generate deep analysis. Please try again.', 'error');
@@ -1218,14 +1208,14 @@ async function generateDeepAnalysis() {
 
 async function generateLearningGame() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create an educational game concept for learning "${topic}". Design as:
 
@@ -1266,13 +1256,13 @@ async function generateLearningGame() {
 - Digital or physical format
 - Single/multiplayer options
 - Accessibility features`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatLearningGame(result);
         saveHistory(`Learning Game: ${topic}`);
         showNotification('Learning game created!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating learning game:', error);
         showNotification('Failed to generate learning game. Please try again.', 'error');
@@ -1368,14 +1358,14 @@ async function speakAgain() {
     const text = document.querySelector('.voice-text')?.textContent;
     const languageMatch = document.querySelector('.voice-output h3')?.textContent.match(/\(([^)]+)\)/);
     const language = languageMatch ? languageMatch[1] : 'english';
-    
+
     if (text) {
         // Try external TTS first for Hindi only
         if (language.toLowerCase() === 'hindi') {
             const success = await speakTextWithExternalTTS(text, language);
             if (success) return;
         }
-        
+
         // Fallback to Web Speech API
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 0.9;
@@ -1399,14 +1389,14 @@ function formatPracticeProblems(result) {
 // ===== QUICK SUMMARY GENERATOR =====
 async function generateSummary() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a comprehensive but concise summary of "${topic}". Include:
         
@@ -1418,13 +1408,13 @@ async function generateSummary() {
         ⚡ Quick Facts: [2-3 interesting facts]
         
         Keep it under 300 words total. Use clear, accessible language with emojis for visual organization.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatSummaryResponse(result);
         saveHistory(`Summary Generated: ${topic}`);
         showNotification('Summary generated successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating summary:', error);
         showNotification('Failed to generate summary. Please try again.', 'error');
@@ -1438,14 +1428,14 @@ async function generateSummary() {
 // AI Tutor Chat
 async function openAITutor() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `You are an expert AI tutor specializing in "${topic}". Start an interactive tutoring session by:
         
@@ -1455,16 +1445,16 @@ async function openAITutor() {
         4. Offering to answer questions or provide explanations
         
         Make it conversational, encouraging, and adaptive to their needs. Use emojis naturally. Keep your response under 250 words and AVOID using asterisks (*) for emphasis. Use plain text formatting instead.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         // Remove asterisks from the response
         const cleanResult = result.replace(/\*/g, '');
-        
+
         document.getElementById("extraOutput").innerHTML = formatTutorResponse(cleanResult);
         saveHistory(`AI Tutor Session: ${topic}`);
         showNotification('AI tutor ready!', 'success');
-        
+
     } catch (error) {
         console.error('Error starting AI tutor:', error);
         showNotification('Failed to start AI tutor. Please try again.', 'error');
@@ -1476,31 +1466,31 @@ async function openAITutor() {
 // Multi-Language Translation
 async function translateContent() {
     const content = document.getElementById("output").innerText;
-    
+
     if (!content || content.includes('Your AI-generated explanation')) {
         showNotification('Please generate content first!', 'warning');
         return;
     }
-    
+
     const targetLanguage = prompt('Enter target language (e.g., Hindi, Bengali, Tamil, Telugu, Spanish, French, German, Chinese):');
-    
+
     if (!targetLanguage) return;
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Translate the following content to ${targetLanguage}. 
 
 Important: If the target language is Hindi, Bengali, Tamil, or Telugu, please provide accurate translations using proper scripts (Devanagari for Hindi, Bengali script for Bengali, Tamil script for Tamil, Telugu script for Telugu). Maintain the structure, formatting, and technical accuracy. Keep any code examples unchanged:
 
 ${content}`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatTranslationResponse(result, targetLanguage);
         saveHistory(`Translated to ${targetLanguage}`);
         showNotification(`Content translated to ${targetLanguage}!`, 'success');
-        
+
     } catch (error) {
         console.error('Error translating content:', error);
         showNotification('Failed to translate content. Please try again.', 'error');
@@ -1512,14 +1502,14 @@ ${content}`;
 // Video Script Generator
 async function generateVideoScript() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a 5-minute educational video script about "${topic}". Structure it as:
         
@@ -1542,13 +1532,13 @@ async function generateVideoScript() {
         - Outro: [Closing remarks]
         
         Include visual cues, on-screen text suggestions, and transition notes.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatVideoScriptResponse(result);
         saveHistory(`Video Script Created: ${topic}`);
         showNotification('Video script created successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating video script:', error);
         showNotification('Failed to generate video script. Please try again.', 'error');
@@ -1560,14 +1550,14 @@ async function generateVideoScript() {
 // Podcast Outline Generator
 async function generatePodcastOutline() {
     const topic = document.getElementById("topicInput").value.trim() || currentTopic;
-    
+
     if (!topic) {
         showNotification('Please enter a topic first!', 'warning');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         const prompt = `Create a 15-minute podcast episode outline about "${topic}". Structure it as:
         
@@ -1595,13 +1585,13 @@ async function generatePodcastOutline() {
         🎵 Outro Music (1:00): [Closing and preview]
         
         Include talking points, potential questions, and sound effect suggestions.`;
-        
-        const result = await callGeminiAPI(prompt);
-        
+
+        const result = await callGroqAPI(prompt);
+
         document.getElementById("extraOutput").innerHTML = formatPodcastResponse(result);
         saveHistory(`Podcast Outline Created: ${topic}`);
         showNotification('Podcast outline created successfully!', 'success');
-        
+
     } catch (error) {
         console.error('Error generating podcast outline:', error);
         showNotification('Failed to generate podcast outline. Please try again.', 'error');
@@ -1614,7 +1604,7 @@ async function generatePodcastOutline() {
 function formatAIResponse(response) {
     // Remove asterisks and format properly
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="ai-response fade-in">
         <div class="response-header">
             <i class="fas fa-brain"></i> AI Generated Explanation
@@ -1630,7 +1620,7 @@ function formatAIResponse(response) {
 
 function formatQuizResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="quiz-response fade-in">
         <div class="response-header">
             <i class="fas fa-question-circle"></i> AI Generated Quiz
@@ -1648,7 +1638,7 @@ function formatQuizResponse(response) {
 
 function formatStudyPlanResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="study-plan-response fade-in">
         <div class="response-header">
             <i class="fas fa-calendar-alt"></i> Study Plan
@@ -1666,7 +1656,7 @@ function formatStudyPlanResponse(response) {
 
 function formatCodeResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>').replace(/\n/g, '<br>');
-    
+
     return `<div class="code-response fade-in">
         <div class="response-header">
             <i class="fas fa-code"></i> Code Examples
@@ -1684,7 +1674,7 @@ function formatCodeResponse(response) {
 
 function formatMindMapResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\n/g, '<br>');
-    
+
     return `<div class="mindmap-response fade-in">
         <div class="response-header">
             <i class="fas fa-project-diagram"></i> Mind Map
@@ -1697,7 +1687,7 @@ function formatMindMapResponse(response) {
 
 function formatFlashcardsResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="flashcards-response fade-in">
         <div class="response-header">
             <i class="fas fa-layer-group"></i> Study Flashcards
@@ -1715,7 +1705,7 @@ function formatFlashcardsResponse(response) {
 
 function formatSummaryResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="summary-response fade-in">
         <div class="response-header">
             <i class="fas fa-compress-alt"></i> Quick Summary
@@ -1729,7 +1719,7 @@ function formatSummaryResponse(response) {
 function formatTutorResponse(response) {
     // Remove asterisks and other markdown formatting
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="tutor-response fade-in">
         <div class="response-header">
             <i class="fas fa-comments"></i> AI Tutor Chat
@@ -1747,7 +1737,7 @@ function formatTutorResponse(response) {
 
 function formatTranslationResponse(response, language) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\n/g, '<br>');
-    
+
     return `<div class="translation-response fade-in">
         <div class="response-header">
             <i class="fas fa-language"></i> Translated to ${language}
@@ -1760,7 +1750,7 @@ function formatTranslationResponse(response, language) {
 
 function formatVideoScriptResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="video-script-response fade-in">
         <div class="response-header">
             <i class="fas fa-video"></i> Video Script
@@ -1778,7 +1768,7 @@ function formatVideoScriptResponse(response) {
 
 function formatPodcastResponse(response) {
     const cleanResponse = response.replace(/\*/g, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-    
+
     return `<div class="podcast-response fade-in">
         <div class="response-header">
             <i class="fas fa-podcast"></i> Podcast Outline
@@ -1811,13 +1801,13 @@ function showHistory() {
         `;
         return;
     }
-    
+
     let historyHTML = `<div class="history-content">
         <div class="response-header">
             <i class="fas fa-history"></i> Learning History
         </div>
         <div class="history-list">`;
-    
+
     learningHistory.slice().reverse().forEach((item, index) => {
         const date = new Date(item.timestamp);
         const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
@@ -1828,7 +1818,7 @@ function showHistory() {
             </div>
         `;
     });
-    
+
     historyHTML += `</div></div>`;
     document.getElementById("extraOutput").innerHTML = historyHTML;
 }
@@ -1838,18 +1828,18 @@ function exportHistory() {
         showNotification('No history to export!', 'warning');
         return;
     }
-    
-    const historyText = learningHistory.map(item => 
+
+    const historyText = learningHistory.map(item =>
         `${item.timestamp}: ${item.entry}`
     ).join('\n');
-    
+
     const blob = new Blob([historyText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `learnsense-history-${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
-    
+
     showNotification('History exported successfully!', 'success');
 }
 
@@ -1884,27 +1874,27 @@ function updateStatsDisplay() {
     const totalSessionsEl = document.getElementById("totalSessions");
     const topicsLearnedEl = document.getElementById("topicsLearned");
     const quizScoreEl = document.getElementById("quizScore");
-    
+
     if (totalSessionsEl) totalSessionsEl.textContent = userStats.totalSessions;
     if (topicsLearnedEl) topicsLearnedEl.textContent = userStats.topicsLearned;
     if (quizScoreEl) {
-        const avgScore = userStats.quizScores.length > 0 
+        const avgScore = userStats.quizScores.length > 0
             ? Math.round(userStats.quizScores.reduce((a, b) => a + b, 0) / userStats.quizScores.length)
             : 0;
         quizScoreEl.textContent = avgScore + '%';
     }
-    
+
     // These elements are in the analytics section
     const totalTimeEl = document.getElementById("totalTime");
     const completionRateEl = document.getElementById("completionRate");
     const streakDaysEl = document.getElementById("streakDays");
     const knowledgeScoreEl = document.getElementById("knowledgeScore");
-    
+
     if (totalTimeEl) totalTimeEl.textContent = formatTime(userStats.studyTime);
     if (completionRateEl) completionRateEl.textContent = userStats.completionRate + '%';
     if (streakDaysEl) streakDaysEl.textContent = userStats.streakDays;
     if (knowledgeScoreEl) knowledgeScoreEl.textContent = userStats.knowledgeScore;
-    
+
     // Update chart with new data
     updateChart();
 }
@@ -1921,12 +1911,12 @@ let progressChart = null;
 function initializeChart() {
     const ctx = document.getElementById('progressChart');
     if (!ctx) return;
-    
+
     // Destroy existing chart if it exists
     if (progressChart) {
         progressChart.destroy();
     }
-    
+
     progressChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1985,17 +1975,17 @@ function generateProgressData() {
     const baseProgress = userStats.totalSessions * 5; // 5 points per session
     const topicsBonus = userStats.topicsLearned * 10; // 10 points per topic
     const totalProgress = Math.min(baseProgress + topicsBonus, 100);
-    
+
     // Create a realistic progression
     const data = [];
     let current = 0;
     const increment = totalProgress / 4;
-    
+
     for (let i = 0; i < 4; i++) {
         current = Math.min(current + increment + Math.random() * 10, 100);
         data.push(Math.round(current));
     }
-    
+
     return data;
 }
 
@@ -2014,9 +2004,9 @@ function showNotification(message, type = 'info') {
         <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
         <span>${message}</span>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.classList.add('fade-out');
         setTimeout(() => notification.remove(), 500);
@@ -2067,18 +2057,18 @@ function downloadFile(content, filename) {
 function continueTutorChat() {
     const question = prompt('Ask your question to the AI tutor:');
     if (!question) return;
-    
+
     showLoading();
-    
+
     // Store current conversation context
     const currentTopic = document.getElementById("topicInput").value.trim() || 'the current topic';
-    
+
     // Call the actual API for a real response
     callGeminiAPI(`As an expert AI tutor for "${currentTopic}", answer this student question: "${question}". Be conversational, clear, and encouraging. Use emojis naturally. Keep your response under 200 words and avoid using asterisks (*) for emphasis. Use plain text formatting instead.`)
         .then(response => {
             // Remove asterisks and format properly
             const cleanResponse = response.replace(/\*/g, '');
-            
+
             document.getElementById("extraOutput").innerHTML += `
                 <div class="tutor-message fade-in">
                     <strong>You:</strong> ${question}<br>

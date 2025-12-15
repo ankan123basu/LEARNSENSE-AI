@@ -3,11 +3,11 @@
 ![LearnSense AI Logo](https://img.shields.io/badge/LearnSense-AI-blue?style=for-the-badge&logo=brain)
 ![Version](https://img.shields.io/badge/version-2.0.0-green?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-purple?style=for-the-badge)
-![Powered by Gemini](https://img.shields.io/badge/Powered%20by-Gemini-orange?style=for-the-badge&logo=google)
+![Powered by Groq](https://img.shields.io/badge/Powered%20by-Groq-orange?style=for-the-badge)
 
 ## 🌟 Welcome to the Future of Learning!
 
-**LearnSense AI is not just another educational tool - it's your personal AI-powered learning companion that adapts, understands, and grows with you. Powered by cutting-edge Google Gemini 2.0 Flash technology, this platform revolutionizes how students learn, practice, and master any subject.**
+**LearnSense AI is not just another educational tool - it's your personal AI-powered learning companion that adapts, understands, and grows with you. Powered by cutting-edge Groq API (Llama 3.3 70B) technology, this platform revolutionizes how students learn, practice, and master any subject.**
 Imagine having a brilliant tutor available 24/7, ready to explain complex concepts in your preferred language, generate personalized study materials, create interactive flashcards, and even coach you for interviews - all through an intuitive, beautiful interface designed for the modern learner.
 <img width="1919" height="790" alt="Screenshot 2025-11-30 040900" src="https://github.com/user-attachments/assets/859ad789-266b-473f-bbdb-8bc84297c438" />
 <img width="1827" height="877" alt="Screenshot 2025-11-30 040940" src="https://github.com/user-attachments/assets/bb6efe70-5ef4-4df0-a3b6-1c109bc360d9" />
@@ -27,7 +27,7 @@ Imagine having a brilliant tutor available 24/7, ready to explain complex concep
 - **🗺️ Mind Maps** - Visual concept connections
 
 ### 🚀 **Cutting-Edge Technology**
-- **Google Gemini 2.0 Flash** - Latest AI model for superior responses
+- **Groq Llama 3.3 70B** - Ultra-fast AI model for superior responses
 - **Web Speech API** - Natural voice synthesis with multiple language support
 - **External TTS Integration** - High-quality Hindi voice synthesis
 - **Local Storage** - Your learning history and preferences saved locally
@@ -85,7 +85,7 @@ learnsense-ai/
 - **Font Awesome** - Beautiful icon library
 
 ### 🤖 **AI Integration**
-- **Google Gemini 2.0 Flash** - State-of-the-art language model
+- **Groq API (Llama 3.3 70B)** - State-of-the-art language model
 - **RESTful API** - Clean API architecture
 - **Error Handling** - Robust error recovery
 - **Rate Limiting** - Responsible API usage
@@ -332,7 +332,7 @@ git log --graph --decorate --oneline --all
 ## 🧩 Challenges & Solutions
 
 ### 🎯 **Technical Challenges**
-- **API Key Security** - Implemented secure config.js approach
+- **API Key Security** - Implemented secure config-loader.js approach using .env
 - **Cross-Browser Compatibility** - Added webkit prefixes for Safari
 - **Voice Synthesis** - Integrated external TTS for Indian languages
 - **Flashcard 3D Animations** - Perfected CSS transforms and perspective
@@ -367,7 +367,7 @@ This assignment gave me **real-world version control experience**, improving my 
 ### 💻 **Technical Skills Acquired**
 - **Advanced JavaScript** - ES6+, async/await, API integration
 - **Modern CSS** - CSS Variables, animations, responsive design
-- **AI Integration** - Google Gemini API, prompt engineering
+- **AI Integration** - Groq API, prompt engineering
 - **Version Control** - Professional Git workflow mastery
 
 ### 🎨 **Design Skills Developed**
@@ -387,7 +387,7 @@ This assignment gave me **real-world version control experience**, improving my 
 
 ### 📋 **Prerequisites**
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- Google Gemini API key
+- Groq API key
 - Basic understanding of web technologies
 
 ### ⚡ **Installation Steps**
@@ -400,17 +400,11 @@ cd learnsense-ai
 
 2. **🔑 Set Up API Key**
 ```bash
-# Option 1: Environment File
-cp .env.example .env
-# Edit .env with your Gemini API key
+# Create .env file:
+GROQ_API_KEY=your_groq_api_key_here
 
-# Option 2: Config File (for static hosting)
-# Create config.js:
-const API_CONFIG = {
-    GEMINI_API_KEY: 'your_gemini_api_key_here',
-    GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
-};
-window.API_CONFIG = API_CONFIG;
+# config-loader.js will automatically load this
+```
 ```
 
 3. **🚀 Launch Application**
@@ -479,7 +473,7 @@ copies or substantial portions of the Software.
 ```
 
 ### 🙏 **Acknowledgments**
-- **Google** - For the amazing Gemini 2.0 Flash API
+- **Groq** - For the amazing LPU inference engine and Llama 3.3 70B model
 - **Font Awesome** - For beautiful icons
 - **LPU** - For the opportunity to create this project
 - **GitHub** - For hosting and version control
