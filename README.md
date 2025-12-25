@@ -167,6 +167,10 @@ git merge feature-conflict
 - Final resolved line: `<title>LearnSense AI - Student AI Guide</title>`
 - Committed with: `git add index.html && git commit -m "RESOLVED MERGE CONFLICT MANUALLY in index.html title"`
 
+**Tags:**
+<img width="645" height="50" alt="Screenshot 2025-12-25 221610" src="https://github.com/user-attachments/assets/b2536b28-78fc-442f-8ee9-fe50fdbb31d4" />
+<img width="606" height="189" alt="Screenshot 2025-12-25 221617" src="https://github.com/user-attachments/assets/9bb25361-8f43-4377-9100-ea73ab6d5d3a" />
+
 ---
 
 ## Documentation
